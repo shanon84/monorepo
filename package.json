@@ -4,6 +4,10 @@
   "license": "MIT",
   "private": true,
   "packageManager": "yarn@4.3.1",
+  "scripts": {
+    "build": "nx run-many -t build"
+  },
+
   "dependencies": {
     "next": "14.2.3",
     "react": "18.3.1",
@@ -21,6 +25,7 @@
     "@nx/playwright": "19.3.1",
     "@nx/workspace": "19.3.1",
     "@playwright/test": "^1.36.0",
+    "@prettier/plugin-xml": "^3.4.1",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
@@ -43,6 +48,7 @@
     "jest-environment-jsdom": "^29.4.1",
     "nx": "19.3.1",
     "prettier": "^2.6.2",
+    "prettier-plugin-java": "2.5.0",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
     "typescript": "~5.4.2"

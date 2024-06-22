@@ -2,3 +2,12 @@
 /.yarn/releases/*    binary
 /.yarn/plugins/**/*  binary
 /.pnp.*              binary linguist-generated
+
+
+#
+# https://help.github.com/articles/dealing-with-line-endings/
+#
+# Linux start script should use lf
+mvnw text eol=lf
+# Windows script files should use crlf
+mvnw.cmd text eol=crlf
