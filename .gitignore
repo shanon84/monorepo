@@ -42,6 +42,8 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 
+.yarn/
+
 # Next.js
 .next
 out
