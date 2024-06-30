@@ -15,7 +15,9 @@
   </properties>
 
   <modules>
-    <module>libs/my-lib1</module>
     <module>libs/parent/dependencies</module>
+    <module>libs/parent/parent</module>
+
+    <module>libs/my-lib1</module>
   </modules>
 </project>
