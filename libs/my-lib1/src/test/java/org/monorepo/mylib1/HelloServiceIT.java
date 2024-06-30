@@ -1,4 +1,4 @@
-package com.example.mylib3;
+package org.monorepo.mylib1;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
-public class HelloServiceTests {
+public class HelloServiceIT {
 
     @Autowired
     private HelloService helloService;

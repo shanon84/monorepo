@@ -4,24 +4,14 @@
   "projectType": "library",
   "sourceRoot": "./my-lib1/src",
   "targets": {
-    "build": {
-      "executor": "@jnxplus/nx-maven:run-task",
-      "outputs": [
-        "{projectRoot}/target",
-        "{options.outputDirLocalRepo}"
-      ],
-      "options": {
-        "task": "install -DskipTests=true"
-      }
+    "build-BE": {
+      "executor": "@jnxplus/nx-maven:run-task"
     },
-    "test": {
-      "executor": "@jnxplus/nx-maven:run-task",
-      "options": {
-        "task": "test"
-      },
-      "dependsOn": [
-        "build"
-      ]
+    "unittest-BE": {
+      "executor": "@jnxplus/nx-maven:run-task"
+    },
+    "integrationtest-BE": {
+      "executor": "@jnxplus/nx-maven:run-task"
     }
   },
   "tags": []

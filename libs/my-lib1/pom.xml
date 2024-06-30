@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.monorepo</groupId>
+
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>dependencies</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../parent/dependencies/pom.xml</relativePath>
+  </parent>
+
+	<groupId>com.example</groupId>
 	<artifactId>my-lib1</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>my-lib1</name>
 	<description>This project was generated with nx-maven</description>
-
-	<parent>
-		<groupId>org.monorepo</groupId>
-		<artifactId>root-parent-monorepo</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
-	</parent>
 
 	<dependencies>
 		<dependency>

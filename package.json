@@ -46,6 +46,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "nx": "^19.3.2",
+    "nx-remotecache-minio": "^19.0.0",
     "prettier": "^3.3.2",
     "prettier-plugin-java": "^2.6.0",
     "ts-jest": "^29.1.5",

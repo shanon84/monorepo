@@ -2,10 +2,7 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "master",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -16,7 +13,37 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": []
+    "sharedGlobals": [],
+    "maven": [
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/pom.xml"
+    ]
+  },
+  "targetDefaults": {
+    "build-BE": {
+      "inputs": ["maven", "^maven"],
+      "outputs": ["{projectRoot}/target","{options.outputDirLocalRepo}"],
+      "dependsOn": ["^build-BE"],
+      "options": {
+        "task": "clean install -DskipTests -DskipITs"
+      }
+    },
+    "unittest-BE": {
+      "inputs": ["maven", "^maven"],
+      "outputs": ["{projectRoot}/target/surfire-reports"],
+      "options": {
+        "task": "surefire:test"
+      },
+      "dependsOn": ["build-BE"]
+    },
+    "integrationtest-BE": {
+      "inputs": ["maven", "^maven"],
+      "outputs": ["{projectRoot}/target/failsafe-reports"],
+      "options": {
+        "task": "failsafe:integration-test"
+      },
+      "dependsOn": ["build-BE"]
+    }
   },
   "plugins": [
     {
@@ -60,5 +87,18 @@
         "linter": "eslint"
       }
     }
-  }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-remotecache-minio",
+      "options": {
+        "accessKey": "minioadmin",
+        "secretKey": "minioadmin",
+        "url": "http://localhost:9000",
+        "bucket": "remotecache",
+        "cacheableOperations": ["build", "test", "lint", "e2e", "build-BE", "unittest-BE", "integrationtest-BE"]
+      }
+    }
+  },
+  "nxCloudAccessToken": "ZDIwM2RiMjMtOGEzYy00NThlLWEyNTctNWNhM2JkNmRhMDNkfHJlYWQtd3JpdGU="
 }
