@@ -1,10 +1,10 @@
-package org.monorepo.mylib1;
+package com.example.mylib1;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
- class HelloServiceTest {
+class HelloServiceTest {
   HelloService helloService = new HelloService();
 
   @Test

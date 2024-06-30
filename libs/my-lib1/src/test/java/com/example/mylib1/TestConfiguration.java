@@ -1,4 +1,4 @@
-package org.monorepo.mylib1;
+package com.example.mylib1;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

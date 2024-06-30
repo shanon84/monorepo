@@ -1,4 +1,4 @@
-package org.monorepo.mylib1;
+package com.example.mylib1;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HelloService {
 
-    public String message() {
-        return "Hello World!";
-    }
+  public String message() {
+    return "Hello World!";
+  }
 }

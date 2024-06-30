@@ -12,6 +12,7 @@
 
   <properties>
     <java.version>21</java.version>
+    <spring.boot.version>3.2.0</spring.boot.version>
   </properties>
 
   <modules>
@@ -19,5 +20,6 @@
     <module>libs/parent/parent</module>
 
     <module>libs/my-lib1</module>
+    <module>apps/hello-app</module>
   </modules>
 </project>

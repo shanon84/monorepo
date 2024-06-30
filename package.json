@@ -5,7 +5,9 @@
   "private": true,
   "packageManager": "yarn@4.3.1",
   "scripts": {
-    "build": "nx run-many -t build"
+    "build-BE": "nx run-many -t build-BE",
+    "unittest-BE": "nx run-many -t unittest-BE",
+    "integrationtest-BE": "nx run-many -t integrationtest-BE"
   },
   "dependencies": {
     "next": "^14.2.4",
