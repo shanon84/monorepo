@@ -12,7 +12,6 @@
 
   <properties>
     <java.version>21</java.version>
-    <spring.boot.version>3.2.0</spring.boot.version>
   </properties>
 
   <modules>
@@ -20,6 +19,8 @@
     <module>libs/java/parent/parent</module>
 
     <module>libs/java/global/annotations</module>
+
+    <module>libs/openapi/generator</module>
 
     <module>libs/java/my-lib1</module>
     <module>apps/hello-app</module>
