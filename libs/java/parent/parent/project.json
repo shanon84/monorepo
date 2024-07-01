@@ -1,6 +1,6 @@
 {
-  "name": "dependencies",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "parent",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "targets": {
     "build-BE": {

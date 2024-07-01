@@ -16,10 +16,12 @@
   </properties>
 
   <modules>
-    <module>libs/parent/dependencies</module>
-    <module>libs/parent/parent</module>
+    <module>libs/java/parent/dependencies</module>
+    <module>libs/java/parent/parent</module>
 
-    <module>libs/my-lib1</module>
+    <module>libs/java/global/annotations</module>
+
+    <module>libs/java/my-lib1</module>
     <module>apps/hello-app</module>
   </modules>
 </project>

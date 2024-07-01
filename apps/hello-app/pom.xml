@@ -10,7 +10,7 @@
     <groupId>com.example</groupId>
     <artifactId>parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../../libs/parent/parent/pom.xml</relativePath>
+    <relativePath>../../libs/java/parent/parent/pom.xml</relativePath>
   </parent>
 
   <groupId>com.example</groupId>

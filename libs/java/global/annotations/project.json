@@ -1,7 +1,8 @@
 {
-  "name": "parent",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "global-annotations",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
+  "sourceRoot": "./src",
   "targets": {
     "build-BE": {
       "executor": "@jnxplus/nx-maven:run-task"
