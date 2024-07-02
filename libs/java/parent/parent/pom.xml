@@ -21,7 +21,6 @@
 
   <properties>
     <resource.delimiter>@</resource.delimiter>
-    <openapi-generator-maven-plugin.version>7.6.0</openapi-generator-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -78,11 +77,6 @@
           <configuration>
             <mainClass>${start-class}</mainClass>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.openapitools</groupId>
-          <artifactId>openapi-generator-maven-plugin</artifactId>
-          <version>${openapi-generator-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>

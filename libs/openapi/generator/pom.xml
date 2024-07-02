@@ -13,12 +13,27 @@
   <artifactId>openapi-generator</artifactId>
   <name>sample-project</name>
 
-  <properties>
-    <swagger-ui.version>4.15.5</swagger-ui.version>
-    <swagger.version>2.2.22</swagger.version>
-  </properties>
-
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <configuration>
+            <modelNameSuffix>DTO</modelNameSuffix>
+            <configOptions>
+              <serializableModel>true</serializableModel>
+              <useSpringBoot3>true</useSpringBoot3>
+              <hideGenerationTimestamp>true</hideGenerationTimestamp>
+              <useTags>true</useTags>
+              <interfaceOnly>true</interfaceOnly>
+              <skipDefaultInterface>true</skipDefaultInterface>
+            </configOptions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -33,20 +48,30 @@
               <inputSpec>${project.basedir}/src/main/resources/openapi/openapi.yml</inputSpec>
               <generatorName>spring</generatorName>
               <templateDirectory>${project.basedir}/src/main/resources/openapi/templates/</templateDirectory>
-              <modelNameSuffix>DTO</modelNameSuffix>
-              <generateApiTests>true</generateApiTests>
-              <configOptions>
-                <serializableModel>true</serializableModel>
-                <useSpringBoot3>true</useSpringBoot3>
-                <hideGenerationTimestamp>true</hideGenerationTimestamp>
-                <useTags>true</useTags>
-                <interfaceOnly>true</interfaceOnly>
-                <skipDefaultInterface>true</skipDefaultInterface>
-              </configOptions>
-
+              <output>${project.build.directory}/generated-sources/server</output>
             </configuration>
           </execution>
-
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resource-one</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/../serverstub/src/main/java</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/generated-sources/server/src/main/java</directory>
+                  <include>**/*</include>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -57,34 +82,12 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core</artifactId>
-      <version>${swagger.version}</version>
     </dependency>
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>swagger-ui</artifactId>
-      <version>${swagger-ui.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>webjars-locator-core</artifactId>
-    </dependency>
-    <!-- @Nullable annotation -->
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -93,7 +96,6 @@
     <dependency>
       <groupId>org.openapitools</groupId>
       <artifactId>jackson-databind-nullable</artifactId>
-      <version>0.2.6</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

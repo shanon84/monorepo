@@ -21,6 +21,7 @@
     <module>libs/java/global/annotations</module>
 
     <module>libs/openapi/generator</module>
+    <module>libs/openapi/serverstub</module>
 
     <module>libs/java/my-lib1</module>
     <module>apps/hello-app</module>
