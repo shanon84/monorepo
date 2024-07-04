@@ -19,6 +19,7 @@
     <module>libs/java/parent/parent</module>
 
     <module>libs/java/global/annotations</module>
+    <module>libs/java/archunit/global</module>
 
     <module>libs/openapi/generator</module>
     <module>libs/openapi/serverstub</module>

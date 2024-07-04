@@ -11,71 +11,9 @@
 
   <groupId>com.example</groupId>
   <artifactId>openapi-generator</artifactId>
-  <name>sample-project</name>
+  <packaging>pom</packaging>
+  <name>openapi-generator</name>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.openapitools</groupId>
-          <artifactId>openapi-generator-maven-plugin</artifactId>
-          <configuration>
-            <modelNameSuffix>DTO</modelNameSuffix>
-            <configOptions>
-              <serializableModel>true</serializableModel>
-              <useSpringBoot3>true</useSpringBoot3>
-              <hideGenerationTimestamp>true</hideGenerationTimestamp>
-              <useTags>true</useTags>
-              <interfaceOnly>true</interfaceOnly>
-              <skipDefaultInterface>true</skipDefaultInterface>
-            </configOptions>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <groupId>org.openapitools</groupId>
-        <artifactId>openapi-generator-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>spring-server</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${project.basedir}/src/main/resources/openapi/openapi.yml</inputSpec>
-              <generatorName>spring</generatorName>
-              <templateDirectory>${project.basedir}/src/main/resources/openapi/templates/</templateDirectory>
-              <output>${project.build.directory}/generated-sources/server</output>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resource-one</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/../serverstub/src/main/java</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/target/generated-sources/server/src/main/java</directory>
-                  <include>**/*</include>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -102,4 +40,8 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
+
+  <modules>
+    <module>generator-pet</module>
+  </modules>
 </project>

@@ -1,7 +1,8 @@
 {
-  "name": "openapi-serverstub",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "archunit-global",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
+  "sourceRoot": "./src",
   "targets": {
     "build-BE": {
       "executor": "@jnxplus/nx-maven:run-task"

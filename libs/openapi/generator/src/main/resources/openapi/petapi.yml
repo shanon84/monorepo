@@ -7,6 +7,9 @@ info:
     url: http://soundso.com
 servers:
   - url: http://petstore.swagger.io/v1
+tags:
+  - name: pets
+
 paths:
   /pets:
     get:

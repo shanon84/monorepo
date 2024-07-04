@@ -1,12 +1,10 @@
 {
-  "name": "openapi-generator",
+  "name": "openapi-pet",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "targets": {
     "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task",
-      "outputs": [],
-      "cache": false
+      "executor": "@jnxplus/nx-maven:run-task"
     }
   },
   "tags": []
