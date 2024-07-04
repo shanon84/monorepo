@@ -10,7 +10,7 @@
   </parent>
 
   <groupId>com.example</groupId>
-  <artifactId>openapi-serverstub</artifactId>
+  <artifactId>openapi-pet-server</artifactId>
   <name>sample-project</name>
 
   <dependencies>

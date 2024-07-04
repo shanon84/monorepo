@@ -22,7 +22,7 @@
     <module>libs/java/archunit/global</module>
 
     <module>libs/openapi/generator</module>
-    <module>libs/openapi/serverstub</module>
+    <module>libs/openapi/openapi-pet-server</module>
 
     <module>libs/java/my-lib1</module>
     <module>apps/hello-app</module>
