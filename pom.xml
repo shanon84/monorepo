@@ -17,6 +17,7 @@
   <modules>
     <module>libs/java/parent/dependencies</module>
     <module>libs/java/parent/parent</module>
+    <module>libs/java/parent/rest</module>
 
     <module>libs/java/global/annotations</module>
     <module>libs/java/archunit/global</module>

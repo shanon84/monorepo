@@ -14,4 +14,21 @@
   <artifactId>archunit-global</artifactId>
   <name>archunit-global</name>
   <description>This project was generated with nx-maven</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>global-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>
