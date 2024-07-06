@@ -18,8 +18,9 @@
     ],
     "sharedGlobals": [],
     "maven": [
-      "{projectRoot}/**/*",
-      "!{projectRoot}/target/**/*"
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/pom.xml",
+      "{projectRoot}/project.json"
     ]
   },
   "targetDefaults": {
