@@ -49,7 +49,7 @@
         "{projectRoot}/target/surfire-reports"
       ],
       "options": {
-        "task": "surefire:test"
+        "task": "surefire:test arch-unit:arch-test"
       },
       "dependsOn": [
         "build-BE"

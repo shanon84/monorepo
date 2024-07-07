@@ -25,6 +25,13 @@
       <artifactId>global-annotations</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>archunit-global</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 
@@ -39,8 +46,28 @@
           </properties>
           <rules>
             <preConfiguredRules>
-              <rule>com.example.archunit.LayeringTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoStandardStreamRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoJunitAssertRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoJodaTimeRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoJavaUtilDateRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoPowerMockRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoPrefixForInterfacesRuleTest</rule>
+              <rule>com.societegenerale.commons.plugin.rules.NoPublicFieldRuleTest</rule>
+
+              <!-- you may want to use one of the below rules, but not both at same time -->
+              <rule>com.societegenerale.commons.plugin.rules.NoTestIgnoreWithoutCommentRuleTest</rule>
+
+              <rule>com.societegenerale.commons.plugin.rules.NoAutowiredFieldTest</rule>
+
             </preConfiguredRules>
+            <configurableRules>
+              <configurableRule>
+                <rule>com.example.archunit.LayeringTest</rule>
+                <applyOn>
+                  <scope>main</scope>
+                </applyOn>
+              </configurableRule>
+            </configurableRules>
           </rules>
         </configuration>
         <executions>

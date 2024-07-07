@@ -5,9 +5,9 @@
 
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>rest</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../parent/parent/pom.xml</relativePath>
+    <relativePath>../parent/rest/pom.xml</relativePath>
   </parent>
 
   <groupId>com.example</groupId>

@@ -25,17 +25,17 @@ public class LayeringTest {
   public static final String SERVICES = "Services";
   public static final String PERSISTENCES = "Persistences";
   public static final String REPOSITORIES = "Repositories";
-  
+
   @ArchTest
   static final ArchRule layer_dependencies_are_respected = Architectures.layeredArchitecture().consideringAllDependencies()
 
-    .layer(CONFIGURATIONS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Configuration.class))
-    .layer(CONTROLLERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Controller.class).or(CanBeAnnotated.Predicates.annotatedWith(RestController.class)))
-    .layer(SCHEDULERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Scheduler.class))
-    .layer(PROPERTIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Properties.class))
-    .layer(SERVICES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Service.class))
-    .layer(PERSISTENCES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Persistence.class))
-    .layer(REPOSITORIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Repository.class))
+    .optionalLayer(CONFIGURATIONS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Configuration.class))
+    .optionalLayer(CONTROLLERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Controller.class).or(CanBeAnnotated.Predicates.annotatedWith(RestController.class)))
+    .optionalLayer(SCHEDULERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Scheduler.class))
+    .optionalLayer(PROPERTIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Properties.class))
+    .optionalLayer(SERVICES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Service.class))
+    .optionalLayer(PERSISTENCES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Persistence.class))
+    .optionalLayer(REPOSITORIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Repository.class))
 
     .whereLayer(CONFIGURATIONS).mayNotBeAccessedByAnyLayer()
     .whereLayer(CONTROLLERS).mayOnlyBeAccessedByLayers(CONFIGURATIONS)
