@@ -42,20 +42,12 @@
     <dependencies>
       <dependency>
         <groupId>io.cucumber</groupId>
-        <artifactId>cucumber-java</artifactId>
+        <artifactId>cucumber-bom</artifactId>
         <version>${cucumber.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>io.cucumber</groupId>
-        <artifactId>cucumber-junit</artifactId>
-        <version>${cucumber.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.cucumber</groupId>
-        <artifactId>cucumber-spring</artifactId>
-        <version>${cucumber.version}</version>
-      </dependency>
-
+    
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit-junit5</artifactId>
