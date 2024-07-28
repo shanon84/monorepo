@@ -1948,39 +1948,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jnxplus/common@npm:1.6.0-1":
-  version: 1.6.0-1
-  resolution: "@jnxplus/common@npm:1.6.0-1"
+"@jnxplus/common@npm:1.7.0-0":
+  version: 1.7.0-0
+  resolution: "@jnxplus/common@npm:1.7.0-0"
   dependencies:
     "@nx/devkit": ">=17.0.0"
     tslib: ^2.6.2
-  checksum: bb685bb6d8298c439883212d6bea6757b87674cd863dc6c92c7745afa90a69e03511438387b6ad25470fdaabca4a1100a0898254d8d2cd95ff6e27071583247b
+  checksum: de33b4b3aa64856c55fc00a7fbfe716fb0b91b13bb04f8d1f76d0041c13a90a23e2c4333f6446aff69cdc2e09f7a8af964936f7e0f631aa8d90265565f036cb6
   languageName: node
   linkType: hard
 
-"@jnxplus/nx-maven@npm:^1.6.0-1":
-  version: 1.6.0-1
-  resolution: "@jnxplus/nx-maven@npm:1.6.0-1"
+"@jnxplus/nx-maven@npm:^1.7.0-0":
+  version: 1.7.0-0
+  resolution: "@jnxplus/nx-maven@npm:1.7.0-0"
   dependencies:
-    "@jnxplus/common": 1.6.0-1
-    "@jnxplus/xml": 1.6.0-1
+    "@jnxplus/common": 1.7.0-0
+    "@jnxplus/xml": 1.7.0-0
     "@nx/devkit": ">=17.0.0"
     flat-cache: ^5.0.0
     nx: ">=17.0.0"
     tslib: ^2.6.2
     xmldoc: ^1.3.0
-  checksum: 92468e06c7ec53d2a557aa5fd7db8a8935835ece4b22ff3243c3f3a446294b1e13b16560e5fc191a0364448475160d86f0f8404df696ce813b436471923941c0
+  checksum: fed6eea9c15aebcf226efb6ccd4fb9213bae5c3bf38ffe2d4863dd2bc0319fb8f727e347a2742718f6ae39720ce1133c2f75f305c73f3ea7e492b082ef82cff3
   languageName: node
   linkType: hard
 
-"@jnxplus/xml@npm:1.6.0-1":
-  version: 1.6.0-1
-  resolution: "@jnxplus/xml@npm:1.6.0-1"
+"@jnxplus/xml@npm:1.7.0-0":
+  version: 1.7.0-0
+  resolution: "@jnxplus/xml@npm:1.7.0-0"
   dependencies:
     "@nx/devkit": ">=17.0.0"
     tslib: ^2.6.2
     xmldoc: ^1.3.0
-  checksum: 4ff87393772b672af8f995f423ba115015c62637d61035966fd6dbf10f7d73f182325375ad671b08bb99900093ee5f215c1a01897f2c13f90071706bb1cae834
+  checksum: c6dfcc2ebdf2d152494d57e18e08ec0b384bef7595d5bdc355d8ea7579d9b6cad359bc7b16e3458265b367b45ef7eb834c9ec5e0c334d2e0106e6815adf8a04d
   languageName: node
   linkType: hard
 
@@ -9922,7 +9922,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "monorepo@workspace:."
   dependencies:
-    "@jnxplus/nx-maven": ^1.6.0-1
+    "@jnxplus/nx-maven": ^1.7.0-0
     "@nx/devkit": 19.4.2
     "@nx/eslint": 19.4.2
     "@nx/eslint-plugin": 19.4.2
