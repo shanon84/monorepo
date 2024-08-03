@@ -36,6 +36,7 @@
     <openapi-generator-maven-plugin.version>7.6.0</openapi-generator-maven-plugin.version>
     <archunit.version>1.3.0</archunit.version>
     <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
+    <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -47,7 +48,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-    
+
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit-junit5</artifactId>
@@ -86,7 +87,32 @@
           <artifactId>arch-unit-maven-plugin</artifactId>
           <version>${arch-unit-maven-plugin.version}</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${versions-maven-plugin.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <configuration>
+          <ruleSet>
+            <ignoreVersions>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>(.+-SNAPSHOT|.+-M\d)</version>
+              </ignoreVersion>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-(alpha|beta)</version>
+              </ignoreVersion>
+            </ignoreVersions>
+          </ruleSet>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
