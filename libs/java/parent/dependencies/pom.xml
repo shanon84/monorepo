@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.7</version>
+    <version>3.3.2</version>
     <relativePath/>
   </parent>
 
@@ -22,18 +22,18 @@
 
   <properties>
     <java.version>21</java.version>
-    <springboot.version>3.2.7</springboot.version>
+    <springboot.version>3.3.2</springboot.version>
     <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
 
     <!-- OPENAPI -->
-    <swagger-ui.version>4.15.5</swagger-ui.version>
+    <swagger-ui.version>5.17.14</swagger-ui.version>
     <swagger.version>2.2.22</swagger.version>
 
     <!-- TESTING -->
-    <cucumber.version>7.14.0</cucumber.version>
+    <cucumber.version>7.18.1</cucumber.version>
 
     <!-- PLUGINS -->
-    <openapi-generator-maven-plugin.version>7.6.0</openapi-generator-maven-plugin.version>
+    <openapi-generator-maven-plugin.version>7.7.0</openapi-generator-maven-plugin.version>
     <archunit.version>1.3.0</archunit.version>
     <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
     <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
