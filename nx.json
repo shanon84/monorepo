@@ -25,6 +25,24 @@
   },
   "targetDefaults": {
     "build-BE": {
+      "cache": true,
+      "inputs": [
+        "maven",
+        "^maven"
+      ],
+      "outputs": [
+        "{projectRoot}/target",
+        "{options.outputDirLocalRepo}"
+      ],
+      "dependsOn": [
+        "^build-BE"
+      ],
+      "options": {
+        "task": "clean install -DskipTests -DskipITs"
+      }
+    },
+    "generate-api": {
+      "cache": false,
       "inputs": [
         "maven",
         "^maven"
@@ -41,9 +59,12 @@
       }
     },
     "unittest-BE": {
+      "cache": true,
       "inputs": [
         "maven",
-        "^maven"
+        "^maven",
+        "{projectRoot}/target",
+        "{options.outputDirLocalRepo}"
       ],
       "outputs": [
         "{projectRoot}/target/surfire-reports"
@@ -56,9 +77,12 @@
       ]
     },
     "integrationtest-BE": {
+      "cache": true,
       "inputs": [
         "maven",
-        "^maven"
+        "^maven",
+        "{projectRoot}/target",
+        "{options.outputDirLocalRepo}"
       ],
       "outputs": [
         "{projectRoot}/target/failsafe-reports"

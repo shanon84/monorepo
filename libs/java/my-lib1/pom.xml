@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.example</groupId>
     <artifactId>rest</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <relativePath>../parent/rest/pom.xml</relativePath>
   </parent>
 
@@ -21,7 +21,7 @@
       <artifactId>openapi-pet-server</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>

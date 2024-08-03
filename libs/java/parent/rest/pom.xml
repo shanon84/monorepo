@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.example</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
@@ -41,6 +41,7 @@
         <groupId>com.societegenerale.commons</groupId>
         <artifactId>arch-unit-maven-plugin</artifactId>
         <configuration>
+          <skip>${skipTests}</skip>
           <properties>
             <archunit.propertyName>propertyValue</archunit.propertyName>
           </properties>

@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.example</groupId>
     <artifactId>openapi-generator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -18,28 +18,6 @@
   </properties>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.openapitools</groupId>
-          <artifactId>openapi-generator-maven-plugin</artifactId>
-          <configuration>
-            <modelNameSuffix>DTO</modelNameSuffix>
-            <generatorName>spring</generatorName>
-            <templateDirectory>${openapi-path}/templates/</templateDirectory>
-            <configOptions>
-              <serializableModel>true</serializableModel>
-              <useSpringBoot3>true</useSpringBoot3>
-              <hideGenerationTimestamp>true</hideGenerationTimestamp>
-              <useTags>true</useTags>
-              <interfaceOnly>true</interfaceOnly>
-              <skipDefaultInterface>true</skipDefaultInterface>
-            </configOptions>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
     <plugins>
       <plugin>
         <groupId>org.openapitools</groupId>

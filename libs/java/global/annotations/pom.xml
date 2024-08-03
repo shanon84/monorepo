@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.example</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <relativePath>../../parent/parent/pom.xml</relativePath>
   </parent>
 
