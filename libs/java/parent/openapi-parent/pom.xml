@@ -55,6 +55,7 @@
           <configuration>
             <modelNameSuffix>DTO</modelNameSuffix>
             <generatorName>spring</generatorName>
+            <generateSupportingFiles>false</generateSupportingFiles>
             <configOptions>
               <serializableModel>true</serializableModel>
               <useSpringBoot3>true</useSpringBoot3>
@@ -64,13 +65,6 @@
               <skipDefaultInterface>true</skipDefaultInterface>
             </configOptions>
           </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>com.example</groupId>
-              <artifactId>openapifiles</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>

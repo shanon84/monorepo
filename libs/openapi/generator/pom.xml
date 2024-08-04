@@ -29,7 +29,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>openapi/petapi.yml</inputSpec>
+              <inputSpec>${basedir}/src/main/resources/openapi/petapi.yml</inputSpec>
               <output>${project.build.directory}/generated-sources/openapi-pet-server</output>
             </configuration>
           </execution>
