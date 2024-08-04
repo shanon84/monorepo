@@ -1,71 +1,61 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>openapi-parent</artifactId>
     <version>${revision}</version>
-    <relativePath>../../java/parent/parent/pom.xml</relativePath>
+    <relativePath>../../java/parent/openapi-parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>com.example</groupId>
-  <artifactId>openapi-generator</artifactId>
-  <packaging>pom</packaging>
-  <name>openapi-generator</name>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>swagger-ui</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.openapitools</groupId>
-      <artifactId>jackson-databind-nullable</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-  </dependencies>
+  <artifactId>generator</artifactId>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.openapitools</groupId>
-          <artifactId>openapi-generator-maven-plugin</artifactId>
-          <configuration>
-            <modelNameSuffix>DTO</modelNameSuffix>
-            <generatorName>spring</generatorName>
-            <templateDirectory>${openapi-path}/templates/</templateDirectory>
-            <configOptions>
-              <serializableModel>true</serializableModel>
-              <useSpringBoot3>true</useSpringBoot3>
-              <hideGenerationTimestamp>true</hideGenerationTimestamp>
-              <useTags>true</useTags>
-              <interfaceOnly>true</interfaceOnly>
-              <skipDefaultInterface>true</skipDefaultInterface>
-            </configOptions>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <configuration>
+          <templateDirectory>${basedir}/src/main/resources/templates/</templateDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>openapi-pet-server</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>openapi/petapi.yml</inputSpec>
+              <output>${project.build.directory}/generated-sources/openapi-pet-server</output>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resource-one</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/../../openapi-pet-server/src/main/java</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/generated-sources/openapi-pet-server/src/main/java</directory>
+                  <include>**/*</include>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
-
-  <modules>
-    <module>generator-pet</module>
-  </modules>
 </project>

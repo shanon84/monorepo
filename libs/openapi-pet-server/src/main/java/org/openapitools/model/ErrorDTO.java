@@ -21,7 +21,7 @@ import jakarta.annotation.Generated;
  */
 
 @JsonTypeName("Error")
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", comments = "Generator version: 7.6.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", comments = "Generator version: 7.7.0")
 public class ErrorDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -50,7 +50,7 @@ public class ErrorDTO implements Serializable {
   /**
    * Get code
    * @return code
-  */
+   */
   @NotNull 
   @Schema(name = "code", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("code")
@@ -70,7 +70,7 @@ public class ErrorDTO implements Serializable {
   /**
    * Get message
    * @return message
-  */
+   */
   @NotNull 
   @Schema(name = "message", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("message")

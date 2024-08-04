@@ -21,7 +21,7 @@ import jakarta.annotation.Generated;
  */
 
 @JsonTypeName("Pet")
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", comments = "Generator version: 7.6.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", comments = "Generator version: 7.7.0")
 public class PetDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -52,7 +52,7 @@ public class PetDTO implements Serializable {
   /**
    * Get id
    * @return id
-  */
+   */
   @NotNull 
   @Schema(name = "id", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("id")
@@ -72,7 +72,7 @@ public class PetDTO implements Serializable {
   /**
    * Get name
    * @return name
-  */
+   */
   @NotNull 
   @Schema(name = "name", requiredMode = Schema.RequiredMode.REQUIRED)
   @JsonProperty("name")
@@ -92,7 +92,7 @@ public class PetDTO implements Serializable {
   /**
    * Get tag
    * @return tag
-  */
+   */
   
   @Schema(name = "tag", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
   @JsonProperty("tag")

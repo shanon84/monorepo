@@ -8,7 +8,7 @@
     "build-BE": "nx run-many -t build-BE",
     "unittest-BE": "nx run-many -t unittest-BE",
     "integrationtest-BE": "nx run-many -t integrationtest-BE",
-    "generate-api": "nx run openapi-generator:generate-api"
+    "generate-api": "nx run-many -t generate-api"
   },
   "dependencies": {
     "next": "^14.2.5",

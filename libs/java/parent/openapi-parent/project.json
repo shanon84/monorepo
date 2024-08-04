@@ -1,0 +1,11 @@
+{
+  "name": "openapi-parent",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "targets": {
+    "build-BE": {
+      "executor": "@jnxplus/nx-maven:run-task"
+    }
+  },
+  "tags": []
+}

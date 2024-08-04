@@ -5,8 +5,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.monorepo</groupId>
-  <artifactId>root-parent-monorepo</artifactId>
+  <groupId>com.example</groupId>
+  <artifactId>aggregator</artifactId>
   <version>${revision}</version>
   <packaging>pom</packaging>
 
@@ -21,8 +21,7 @@
     <module>libs/java/global/annotations</module>
     <module>libs/java/archunit/global</module>
 
-    <module>libs/openapi/generator</module>
-    <module>libs/openapi/openapi-pet-server</module>
+    <module>libs/openapi/</module>
 
     <module>libs/java/my-lib1</module>
     <module>apps/hello-app</module>

@@ -9,17 +9,16 @@
     <groupId>com.example</groupId>
     <artifactId>aggregator</artifactId>
     <version>${revision}</version>
-    <relativePath>../../../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>parent-aggregator</artifactId>
+  <artifactId>openapi-aggregator</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>dependencies</module>
-    <module>parent</module>
-    <module>openapi-parent</module>
-    <module>rest</module>
+    <module>generator</module>
+
+    <module>openapi-pet-server</module>
   </modules>
 </project>

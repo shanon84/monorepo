@@ -1,12 +1,11 @@
 {
-  "name": "openapi-generator",
+  "name": "generator",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "targets": {
     "generate-api": {
       "executor": "@jnxplus/nx-maven:run-task",
-      "outputs": [],
-      "cache": false
+      "outputs": []
     }
   },
   "tags": []
