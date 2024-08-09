@@ -3,11 +3,9 @@ package com.example.mylib1;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.CucumberContextConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
+import lombok.RequiredArgsConstructor;
 
-@CucumberContextConfiguration
-@SpringBootTest
+@RequiredArgsConstructor
 public class PetControllerShowPetByIdSteps {
   @Given("a pet with ID {string}")
   public void createPet(String notificationId) {

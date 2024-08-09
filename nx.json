@@ -38,7 +38,7 @@
         "^build-BE"
       ],
       "options": {
-        "task": "clean install -DskipTests -DskipITs"
+        "task": "clean install -DskipTests"
       }
     },
     "generate-api": {
@@ -81,8 +81,7 @@
       "inputs": [
         "maven",
         "^maven",
-        "{projectRoot}/target",
-        "{options.outputDirLocalRepo}"
+        "{projectRoot}/target"
       ],
       "outputs": [
         "{projectRoot}/target/failsafe-reports"

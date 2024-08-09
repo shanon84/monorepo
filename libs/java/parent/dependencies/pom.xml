@@ -39,6 +39,7 @@
     <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
     <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+    <junit-platform-commons.version>1.10.3</junit-platform-commons.version>
   </properties>
 
   <dependencyManagement>
@@ -72,6 +73,12 @@
         <groupId>org.webjars</groupId>
         <artifactId>swagger-ui</artifactId>
         <version>${swagger-ui.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-commons</artifactId>
+        <version>${junit-platform-commons.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

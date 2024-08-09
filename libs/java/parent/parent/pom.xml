@@ -21,6 +21,7 @@
 
   <properties>
     <resource.delimiter>@</resource.delimiter>
+    <skipITs>false</skipITs>
   </properties>
 
   <dependencies>
@@ -50,12 +51,18 @@
     </dependency>
     <dependency>
       <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-junit</artifactId>
+      <artifactId>cucumber-junit-platform-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-spring</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite</artifactId>
+      <version>1.10.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -112,17 +119,17 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <testFailureIgnore>true</testFailureIgnore>
-          <properties>
-            <configurationParameters>
-              cucumber.publish.quiet=true
-              cucumber.plugin=json:target/cucumber/cucumber.json
-            </configurationParameters>
-          </properties>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
         </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skipITs>${skipITs}</skipITs>
+          <skipTests>${skipITs}</skipTests>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -131,8 +138,15 @@
             </goals>
             <configuration>
               <includes>
-                <include>%regex[.*IT]</include>
+                <include>**/*IT.java</include>
               </includes>
+              <properties>
+                <configurationParameters>
+                  cucumber.publish.quiet=true
+                  cucumber.publish.enabled=false
+                  junit:target/cucumber-reports/Cucumber.xml
+                </configurationParameters>
+              </properties>
             </configuration>
           </execution>
         </executions>

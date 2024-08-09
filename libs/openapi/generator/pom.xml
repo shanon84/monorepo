@@ -45,7 +45,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/../../openapi-pet-server/src/main/java</outputDirectory>
+              <outputDirectory>${basedir}/../openapi-pet-server/src/main/java</outputDirectory>
               <resources>
                 <resource>
                   <directory>${basedir}/target/generated-sources/openapi-pet-server/src/main/java</directory>
