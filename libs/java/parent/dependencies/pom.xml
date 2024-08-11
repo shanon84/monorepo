@@ -32,15 +32,13 @@
 
     <!-- TESTING -->
     <cucumber.version>7.18.1</cucumber.version>
-
+    <archunit.version>1.3.0</archunit.version>
+    
     <!-- PLUGINS -->
     <openapi-generator-maven-plugin.version>7.7.0</openapi-generator-maven-plugin.version>
-    <archunit.version>1.3.0</archunit.version>
     <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
     <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
-    <junit-platform-commons.version>1.10.3</junit-platform-commons.version>
-    <junit-platform-suite.version>1.10.1</junit-platform-suite.version>
   </properties>
 
   <dependencyManagement>
@@ -53,12 +51,6 @@
         <scope>import</scope>
       </dependency>
 
-      <dependency>
-        <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-suite</artifactId>
-        <version>${junit-platform-suite.version}</version>
-        <scope>test</scope>
-      </dependency>
 
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
@@ -81,12 +73,6 @@
         <groupId>org.webjars</groupId>
         <artifactId>swagger-ui</artifactId>
         <version>${swagger-ui.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-commons</artifactId>
-        <version>${junit-platform-commons.version}</version>
-        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
