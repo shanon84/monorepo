@@ -1948,39 +1948,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jnxplus/common@npm:1.7.4-0":
-  version: 1.7.4-0
-  resolution: "@jnxplus/common@npm:1.7.4-0"
+"@jnxplus/common@npm:1.8.0":
+  version: 1.8.0
+  resolution: "@jnxplus/common@npm:1.8.0"
   dependencies:
     "@nx/devkit": ">=17.0.0"
     tslib: ^2.6.2
-  checksum: 7d0f9d207a044798f701c8238c391e1dd1dd0a7192134f01eef8d36093a13f6bbf1c7e64b9e1a100c8031b9e8ac19738fd7530336fc97d1531ad45de348f058e
+  checksum: 7669321ac4109aa37f58c054edfa8aeacd26175b6b6c8e465f62ed20ae3789c84c1fb98fca8d2df6d3730b6b7425ee01534fc4bce99951258849a0ae2ce90d71
   languageName: node
   linkType: hard
 
-"@jnxplus/nx-maven@npm:^1.7.4-0":
-  version: 1.7.4-0
-  resolution: "@jnxplus/nx-maven@npm:1.7.4-0"
+"@jnxplus/nx-maven@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@jnxplus/nx-maven@npm:1.8.0"
   dependencies:
-    "@jnxplus/common": 1.7.4-0
-    "@jnxplus/xml": 1.7.4-0
+    "@jnxplus/common": 1.8.0
+    "@jnxplus/xml": 1.8.0
     "@nx/devkit": ">=17.0.0"
     flat-cache: ^5.0.0
     nx: ">=17.0.0"
     tslib: ^2.6.2
     xmldoc: ^1.3.0
-  checksum: e68f417a394ec24f6a757162ee45d7f6aabd984ae37c52019c95075684fed1e27da63c8b7d3549349e03a150c08e6eaa4cc348eb9f3f8280aff8083e7c675b61
+  checksum: d0bcd594730e12209c069aba07b068eb221fb3e69c6ea2e7b86ac7a0fb894c6c97b33829c2622d6442a1b325d7585a49a756d5c59d142da2ba3db1919b1dc2b8
   languageName: node
   linkType: hard
 
-"@jnxplus/xml@npm:1.7.4-0":
-  version: 1.7.4-0
-  resolution: "@jnxplus/xml@npm:1.7.4-0"
+"@jnxplus/xml@npm:1.8.0":
+  version: 1.8.0
+  resolution: "@jnxplus/xml@npm:1.8.0"
   dependencies:
     "@nx/devkit": ">=17.0.0"
     tslib: ^2.6.2
     xmldoc: ^1.3.0
-  checksum: f20b7d9a14b6d0095b969d7aeffe0fca113c4eb978d5f1f8aeae665229349c7ea31442b9e1b52679f1e257bc9fded9d80942c4c79e479de112553545266c5e33
+  checksum: 4e59df5eb930ad2284e5732cbad85199e2aafd1dfe23ea846dc08ef27504c82098215ed2be2e761a67b18914ee786f59aaabaa0d5503c52d924b7f33df661916
   languageName: node
   linkType: hard
 
@@ -3818,13 +3818,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.3.3":
+"@types/react@npm:*":
   version: 18.3.3
   resolution: "@types/react@npm:18.3.3"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: c63d6a78163244e2022b01ef79b0baec4fe4da3475dc4a90bb8accefad35ef0c43560fd0312e5974f92a0f1108aa4d669ac72d73d66396aa060ea03b5d2e3873
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.3.4":
+  version: 18.3.4
+  resolution: "@types/react@npm:18.3.4"
+  dependencies:
+    "@types/prop-types": "*"
+    csstype: ^3.0.2
+  checksum: 555ccd1af86a23c781dea0360de64b2f7a0708cdcbf9e6496744b77630065868526fd55147c727dc5ef11b7fd712b04f7898757a84c67e2eb9dfd4c4ead10d95
   languageName: node
   linkType: hard
 
@@ -10634,7 +10644,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "monorepo@workspace:."
   dependencies:
-    "@jnxplus/nx-maven": ^1.7.4-0
+    "@jnxplus/nx-maven": ^1.8.0
     "@nx/devkit": 19.6.2
     "@nx/eslint": 19.6.2
     "@nx/eslint-plugin": 19.6.2
@@ -10650,7 +10660,7 @@ __metadata:
     "@swc/helpers": ^0.5.12
     "@types/jest": 29.5.12
     "@types/node": ^20.14.12
-    "@types/react": ^18.3.3
+    "@types/react": ^18.3.4
     "@types/react-dom": ^18.3.0
     "@typescript-eslint/eslint-plugin": 7.16.0
     "@typescript-eslint/parser": 7.16.0
