@@ -92,6 +92,11 @@
       "dependsOn": [
         "build-BE"
       ]
+    },
+    "e2e-ci--**/*": {
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "plugins": [
