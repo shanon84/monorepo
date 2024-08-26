@@ -42,7 +42,10 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 
-.yarn/
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+.pnp.*
 
 # Next.js
 .next
