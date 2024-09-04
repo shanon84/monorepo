@@ -6,9 +6,13 @@
   "packageManager": "yarn@4.4.1",
   "scripts": {
     "build-BE": "nx run-many -t build-BE",
+    "build-BE:affected": "nx affected -t build-BE",
     "unittest-BE": "nx run-many -t unittest-BE",
+    "unittest-BE:affected": "nx affected -t unittest-BE",
     "integrationtest-BE": "nx run-many -t integrationtest-BE",
-    "generate-api": "nx run-many -t generate-api"
+    "integrationtest-BE:affected": "nx affected -t integrationtest-BE",
+    "generate-api": "nx run-many -t generate-api",
+    "generate-api:affected": "nx affected -t generate-api"
   },
   "dependencies": {
     "next": "^14.2.7",

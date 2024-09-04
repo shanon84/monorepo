@@ -14,6 +14,11 @@
 
   <artifactId>generator</artifactId>
 
+  <properties>
+    <generation-target>openapi-pet-server</generation-target>
+    <yamlfile>openapi/petapi.yml</yamlfile>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -24,13 +29,13 @@
         </configuration>
         <executions>
           <execution>
-            <id>openapi-pet-server</id>
+            <id>${generation-target}</id>
             <goals>
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${basedir}/src/main/resources/openapi/petapi.yml</inputSpec>
-              <output>${project.build.directory}/generated-sources/openapi-pet-server</output>
+              <inputSpec>${basedir}/src/main/resources/${yamlfile}</inputSpec>
+              <output>${project.build.directory}/generated-sources/${generation-target}</output>
             </configuration>
           </execution>
         </executions>
@@ -39,16 +44,16 @@
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-resource-one</id>
+            <id>${generation-target}</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/../openapi-pet-server/src/main/java</outputDirectory>
+              <outputDirectory>${basedir}/../${generation-target}/src/main/java</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${basedir}/target/generated-sources/openapi-pet-server/src/main/java</directory>
+                  <directory>${basedir}/target/generated-sources/${generation-target}/src/main/java</directory>
                   <include>**/*</include>
                 </resource>
               </resources>
