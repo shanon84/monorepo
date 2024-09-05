@@ -1,6 +1,6 @@
 # Monorepo Readme
 
-## idea
+## the idea behind
 
 Maven as a build tool is capable of handling bigger setups, but has it limitations.
 You can either start using a monorepo or use multiple repositories.
@@ -21,7 +21,7 @@ Nx has some fascinating features maven is missing:
 * remote caching: a successfully ran target can be cached remotely (if allowed)
 
 this leads to lesser build/testtime.
-Also it made it more useful to split code into more projects (modules) as before.
+Also, it made it more useful to split code into more projects (modules) as before.
 
 ## Scripts
 
@@ -42,3 +42,23 @@ runs all integration tests.
 ### generate-api
 
 generates all openapis.
+
+## How to upgrade
+
+### nx
+
+```
+nx migrate latest
+```
+
+### other JS dependencies
+
+```
+yarn upgrade-interactive
+```
+
+### maven
+
+```
+.\scripts\update-maven-dependencies.sh
+```
