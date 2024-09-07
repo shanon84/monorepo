@@ -15,51 +15,21 @@
   <artifactId>generator</artifactId>
 
   <properties>
-    <generation-target>openapi-pet-server</generation-target>
+    <generation-target>openapi-pet</generation-target>
     <yamlfile>openapi/petapi.yml</yamlfile>
   </properties>
 
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
-        <configuration>
-          <templateDirectory>${basedir}/src/main/resources/templates/</templateDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>${generation-target}</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${basedir}/src/main/resources/${yamlfile}</inputSpec>
-              <output>${project.build.directory}/generated-sources/${generation-target}</output>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>${generation-target}</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/../${generation-target}/src/main/java</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/target/generated-sources/${generation-target}/src/main/java</directory>
-                  <include>**/*</include>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

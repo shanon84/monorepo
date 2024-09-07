@@ -9,6 +9,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.library.Architectures;
+import org.mapstruct.Mapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,7 @@ public class LayeringTest {
   public static final String SCHEDULERS = "Schedulers";
   public static final String CONFIGURATIONS = "Configurations";
   public static final String PROPERTIES = "Properties";
+  public static final String MAPPERS = "Mapper";
   public static final String SERVICES = "Services";
   public static final String PERSISTENCES = "Persistences";
   public static final String REPOSITORIES = "Repositories";
@@ -33,6 +35,7 @@ public class LayeringTest {
     .optionalLayer(CONTROLLERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Controller.class).or(CanBeAnnotated.Predicates.annotatedWith(RestController.class)))
     .optionalLayer(SCHEDULERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Scheduler.class))
     .optionalLayer(PROPERTIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Properties.class))
+    .optionalLayer(MAPPERS).definedBy(CanBeAnnotated.Predicates.annotatedWith(Mapper.class))
     .optionalLayer(SERVICES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Service.class))
     .optionalLayer(PERSISTENCES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Persistence.class))
     .optionalLayer(REPOSITORIES).definedBy(CanBeAnnotated.Predicates.annotatedWith(Repository.class))
@@ -41,6 +44,7 @@ public class LayeringTest {
     .whereLayer(CONTROLLERS).mayOnlyBeAccessedByLayers(CONFIGURATIONS)
     .whereLayer(SCHEDULERS).mayOnlyBeAccessedByLayers(CONFIGURATIONS)
     .whereLayer(SERVICES).mayOnlyBeAccessedByLayers(CONTROLLERS, SCHEDULERS, CONFIGURATIONS)
+    .whereLayer(MAPPERS).mayOnlyBeAccessedByLayers(CONTROLLERS)
     .whereLayer(PERSISTENCES).mayOnlyBeAccessedByLayers(SERVICES)
     .whereLayer(REPOSITORIES).mayOnlyBeAccessedByLayers(PERSISTENCES);
 }
