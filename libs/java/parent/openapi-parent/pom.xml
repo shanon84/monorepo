@@ -85,6 +85,9 @@
                 <modelNameSuffix>DTO</modelNameSuffix>
                 <generatorName>typescript-axios</generatorName>
                 <configOptions>
+                  <withSeparateModelsAndApi>true</withSeparateModelsAndApi>
+                  <apiPackage>api</apiPackage>
+                  <modelPackage>model</modelPackage>
                 </configOptions>
               </configuration>
             </execution>
@@ -144,6 +147,18 @@
                     <directory>${basedir}/target/generated-sources/${generation-target}-client/</directory>
                     <include>
                       *.ts
+                    </include>
+                  </resource>
+                  <resource>
+                    <directory>${basedir}/target/generated-sources/${generation-target}-client/</directory>
+                    <include>
+                      api/*
+                    </include>
+                  </resource>
+                  <resource>
+                    <directory>${basedir}/target/generated-sources/${generation-target}-client/</directory>
+                    <include>
+                      model/*
                     </include>
                   </resource>
                 </resources>

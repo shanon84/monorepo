@@ -14,5 +14,29 @@
 
 
 
-export * from './api/pets-api';
+/**
+ * 
+ * @export
+ * @interface PetDTO
+ */
+export interface PetDTO {
+    /**
+     * 
+     * @type {number}
+     * @memberof PetDTO
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PetDTO
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PetDTO
+     */
+    'tag'?: string;
+}
 

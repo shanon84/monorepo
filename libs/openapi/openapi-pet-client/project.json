@@ -2,10 +2,6 @@
   "name": "openapi-pet-client",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "targets": {
-    "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
-    }
-  },
+  "targets": {},
   "tags": []
 }

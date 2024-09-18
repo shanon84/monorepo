@@ -14,5 +14,23 @@
 
 
 
-export * from './api/pets-api';
+/**
+ * 
+ * @export
+ * @interface ErrorDTO
+ */
+export interface ErrorDTO {
+    /**
+     * 
+     * @type {number}
+     * @memberof ErrorDTO
+     */
+    'code': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorDTO
+     */
+    'message': string;
+}
 
