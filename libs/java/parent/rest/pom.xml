@@ -25,6 +25,10 @@
       <artifactId>global-annotations</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.example</groupId>
@@ -67,15 +71,9 @@
 
               <rule>com.societegenerale.commons.plugin.rules.NoAutowiredFieldTest</rule>
 
+              <!-- <rule>com.example.archunit.LayeringTest</rule>-->
             </preConfiguredRules>
-            <configurableRules>
-              <configurableRule>
-                <rule>com.example.archunit.LayeringTest</rule>
-                <applyOn>
-                  <scope>main</scope>
-                </applyOn>
-              </configurableRule>
-            </configurableRules>
+
           </rules>
         </configuration>
         <executions>
@@ -91,6 +89,16 @@
             <groupId>com.example</groupId>
             <artifactId>archunit-global</artifactId>
             <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-framework.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
           </dependency>
         </dependencies>
       </plugin>

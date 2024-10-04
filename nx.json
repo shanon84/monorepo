@@ -21,7 +21,8 @@
       "{projectRoot}/src/**/*",
       "{projectRoot}/pom.xml",
       "{projectRoot}/project.json"
-    ]
+    ],
+    "{options.outputDirLocalRepo}": []
   },
   "targetDefaults": {
     "build-BE": {
