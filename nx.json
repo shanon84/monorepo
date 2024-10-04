@@ -17,19 +17,26 @@
       "!{projectRoot}/test-setup.[jt]s"
     ],
     "sharedGlobals": [],
-    "maven": [
+    "defaultMaven": [
       "{projectRoot}/src/**/*",
       "{projectRoot}/pom.xml",
-      "{projectRoot}/project.json"
+      "{projectRoot}/project.json",
+      "sharedGlobalsMaven"
     ],
-    "{options.outputDirLocalRepo}": []
+    "productionMaven": [
+      "defaultMaven",
+      "!{projectRoot}/src/test/**/*"
+    ],
+    "sharedGlobalsMaven": [
+      "{workspaceRoot}/lombok.config"
+    ]
   },
   "targetDefaults": {
     "build-BE": {
       "cache": true,
       "inputs": [
-        "maven",
-        "^maven"
+        "defaultMaven",
+        "^defaultMaven"
       ],
       "outputs": [
         "{projectRoot}/target",
@@ -45,8 +52,8 @@
     "generate-api": {
       "cache": false,
       "inputs": [
-        "maven",
-        "^maven"
+        "defaultMaven",
+        "^defaultMaven"
       ],
       "outputs": [
         "{projectRoot}/target",
@@ -62,10 +69,8 @@
     "unittest-BE": {
       "cache": true,
       "inputs": [
-        "maven",
-        "^maven",
-        "{projectRoot}/target",
-        "{options.outputDirLocalRepo}"
+        "defaultMaven",
+        "^defaultMaven"
       ],
       "outputs": [
         "{projectRoot}/target/surfire-reports"
@@ -81,8 +86,7 @@
       "cache": true,
       "inputs": [
         "maven",
-        "^maven",
-        "{projectRoot}/target"
+        "^maven"
       ],
       "outputs": [
         "{projectRoot}/target/failsafe-reports"
