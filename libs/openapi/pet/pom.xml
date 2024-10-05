@@ -7,17 +7,17 @@
 
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>aggregator</artifactId>
+    <artifactId>openapi-aggregator</artifactId>
     <version>${revision}</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>openapi-aggregator</artifactId>
+  <artifactId>openapi-pet-aggregator</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>openapi-files</module>
-    <module>pet</module>
+    <module>generator</module>
+    <module>server</module>
   </modules>
 </project>
