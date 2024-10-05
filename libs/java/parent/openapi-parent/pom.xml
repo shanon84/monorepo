@@ -21,6 +21,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>openapi-files</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
@@ -47,6 +53,37 @@
   </dependencies>
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.example</groupId>
+                  <artifactId>openapi-files</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <includes>**/*.yml</includes>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}/classes/</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -59,7 +96,7 @@
                 <goal>generate</goal>
               </goals>
               <configuration>
-                <inputSpec>${basedir}/src/main/resources/${yamlfile}</inputSpec>
+                <inputSpec>${basedir}/target/classes/${yamlfile}</inputSpec>
                 <output>${project.build.directory}/generated-sources/${generation-target}-server</output>
                 <modelNameSuffix>DTO</modelNameSuffix>
                 <generatorName>spring</generatorName>
@@ -80,7 +117,7 @@
                 <goal>generate</goal>
               </goals>
               <configuration>
-                <inputSpec>${basedir}/src/main/resources/${yamlfile}</inputSpec>
+                <inputSpec>${basedir}/target/classes/${yamlfile}</inputSpec>
                 <output>${project.build.directory}/generated-sources/${generation-target}-client</output>
                 <modelNameSuffix>DTO</modelNameSuffix>
                 <generatorName>typescript-axios</generatorName>

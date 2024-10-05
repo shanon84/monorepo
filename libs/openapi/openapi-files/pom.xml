@@ -4,22 +4,14 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
-
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.example</groupId>
-    <artifactId>aggregator</artifactId>
+    <artifactId>parent</artifactId>
     <version>${revision}</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../../java/parent/parent/pom.xml</relativePath>
   </parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <artifactId>openapi-aggregator</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>openapi-files</artifactId>
 
-  <modules>
-    <module>openapi-files</module>
-    <module>generator</module>
-
-    <module>openapi-pet/openapi-pet-server</module>
-  </modules>
 </project>
