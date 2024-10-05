@@ -9,10 +9,10 @@
     <groupId>com.example</groupId>
     <artifactId>openapi-parent</artifactId>
     <version>${revision}</version>
-    <relativePath>../../java/parent/openapi-parent/pom.xml</relativePath>
+    <relativePath>../../../java/parent/openapi-parent/pom.xml</relativePath>
   </parent>
 
-  <artifactId>generator</artifactId>
+  <artifactId>openapi-pet-generator</artifactId>
 
   <properties>
     <generation-target>openapi-pet</generation-target>

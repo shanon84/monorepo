@@ -18,8 +18,8 @@
 
   <modules>
     <module>openapi-files</module>
-    <module>generator</module>
 
+    <module>openapi-pet/openapi-pet-generator</module>
     <module>openapi-pet/openapi-pet-server</module>
   </modules>
 </project>

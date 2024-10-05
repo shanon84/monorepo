@@ -162,7 +162,7 @@
                 <goal>copy-resources</goal>
               </goals>
               <configuration>
-                <outputDirectory>${basedir}/../${generation-target}/${generation-target}-server/src/main/java
+                <outputDirectory>${basedir}/../${generation-target}-server/src/main/java
                 </outputDirectory>
                 <resources>
                   <resource>
@@ -179,7 +179,7 @@
                 <goal>copy-resources</goal>
               </goals>
               <configuration>
-                <outputDirectory>${basedir}/../${generation-target}/${generation-target}-client/src/</outputDirectory>
+                <outputDirectory>${basedir}/../${generation-target}-client/src/</outputDirectory>
                 <resources>
                   <resource>
                     <directory>${basedir}/target/generated-sources/${generation-target}-client/</directory>
