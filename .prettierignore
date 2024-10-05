@@ -3,7 +3,13 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+.yarn
+node_modules
 
 # Maven target
-target/
+target
 .m2/repository
+.mvn
+
+libs/openapi/*/client/src/
+libs/openapi/*/server/src/
