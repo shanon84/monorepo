@@ -2,10 +2,7 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "master",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -23,28 +20,15 @@
       "{projectRoot}/project.json",
       "sharedGlobalsMaven"
     ],
-    "productionMaven": [
-      "defaultMaven",
-      "!{projectRoot}/src/test/**/*"
-    ],
-    "sharedGlobalsMaven": [
-      "{workspaceRoot}/lombok.config"
-    ]
+    "productionMaven": ["defaultMaven", "!{projectRoot}/src/test/**/*"],
+    "sharedGlobalsMaven": ["{workspaceRoot}/lombok.config"]
   },
   "targetDefaults": {
     "build-BE": {
       "cache": true,
-      "inputs": [
-        "defaultMaven",
-        "^defaultMaven"
-      ],
-      "outputs": [
-        "{projectRoot}/target",
-        "{options.outputDirLocalRepo}"
-      ],
-      "dependsOn": [
-        "^build-BE"
-      ],
+      "inputs": ["defaultMaven", "^defaultMaven"],
+      "outputs": ["{projectRoot}/target", "{options.outputDirLocalRepo}"],
+      "dependsOn": ["^build-BE"],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "clean install -DskipTests"
@@ -52,17 +36,9 @@
     },
     "generate-api": {
       "cache": false,
-      "inputs": [
-        "defaultMaven",
-        "^defaultMaven"
-      ],
-      "outputs": [
-        "{projectRoot}/target",
-        "{options.outputDirLocalRepo}"
-      ],
-      "dependsOn": [
-        "^build-BE"
-      ],
+      "inputs": ["defaultMaven", "^defaultMaven"],
+      "outputs": ["{projectRoot}/target", "{options.outputDirLocalRepo}"],
+      "dependsOn": ["^build-BE"],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "clean install -DskipTests -DskipITs"
@@ -70,53 +46,33 @@
     },
     "unittest-BE": {
       "cache": true,
-      "inputs": [
-        "defaultMaven",
-        "^defaultMaven"
-      ],
-      "outputs": [
-        "{projectRoot}/target/surfire-reports"
-      ],
+      "inputs": ["defaultMaven", "^defaultMaven"],
+      "outputs": ["{projectRoot}/target/surfire-reports"],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "surefire:test arch-unit:arch-test"
       },
-      "dependsOn": [
-        "build-BE"
-      ]
+      "dependsOn": ["build-BE"]
     },
     "integrationtest-BE": {
       "cache": true,
-      "inputs": [
-        "defaultMaven",
-        "^defaultMaven"
-      ],
-      "outputs": [
-        "{projectRoot}/target/failsafe-reports"
-      ],
+      "inputs": ["defaultMaven", "^defaultMaven"],
+      "outputs": ["{projectRoot}/target/failsafe-reports"],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "failsafe:integration-test"
       },
-      "dependsOn": [
-        "build-BE"
-      ]
+      "dependsOn": ["build-BE"]
     },
     "format-BE": {
-      "inputs": [
-        "defaultMaven"
-      ],
+      "inputs": ["defaultMaven"],
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "prettier . --write"
-        ]
+        "commands": ["prettier . --write"]
       }
     },
     "e2e-ci--**/*": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
   },
   "plugins": [
@@ -174,15 +130,7 @@
         "secretKey": "minioadmin",
         "url": "http://127.0.0.1:9000",
         "bucket": "remotecache",
-        "cacheableOperations": [
-          "build",
-          "test",
-          "lint",
-          "e2e",
-          "build-BE",
-          "unittest-BE",
-          "integrationtest-BE"
-        ]
+        "cacheableOperations": ["build", "test", "lint", "e2e", "build-BE", "unittest-BE", "integrationtest-BE"]
       }
     }
   }

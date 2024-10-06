@@ -4,10 +4,8 @@
   "projectType": "library",
   "sourceRoot": "./src",
   "targets": {
-    "build-BE": {
-    },
-    "format-BE": {
-    }
+    "build-BE": {},
+    "format-BE": {}
   },
   "tags": []
 }

@@ -3,10 +3,8 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "targets": {
-    "generate-api": {
-    },
-    "format-BE": {
-    }
+    "generate-api": {},
+    "format-BE": {}
   },
   "tags": []
 }

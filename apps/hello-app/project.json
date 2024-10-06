@@ -4,8 +4,7 @@
   "projectType": "application",
   "sourceRoot": "./hello-app/src",
   "targets": {
-    "build-BE": {
-    },
+    "build-BE": {},
     "build-image": {
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
@@ -17,16 +16,11 @@
       "options": {
         "task": "spring-boot:run"
       },
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
-    "format-BE": {
-    },
-    "unittest-BE": {
-    },
-    "integrationtest-BE": {
-    }
+    "format-BE": {},
+    "unittest-BE": {},
+    "integrationtest-BE": {}
   },
   "tags": []
 }

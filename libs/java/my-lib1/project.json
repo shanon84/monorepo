@@ -4,14 +4,10 @@
   "projectType": "library",
   "sourceRoot": "./my-lib1/src",
   "targets": {
-    "build-BE": {
-    },
-    "unittest-BE": {
-    },
-    "integrationtest-BE": {
-    },
-    "format-BE": {
-    }
+    "build-BE": {},
+    "unittest-BE": {},
+    "integrationtest-BE": {},
+    "format-BE": {}
   },
   "tags": []
 }
