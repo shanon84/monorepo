@@ -5,7 +5,8 @@
   "sourceRoot": "./src",
   "targets": {
     "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
+    },
+    "format-BE": {
     }
   },
   "tags": []

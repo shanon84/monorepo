@@ -45,6 +45,7 @@
       "dependsOn": [
         "^build-BE"
       ],
+      "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "clean install -DskipTests"
       }
@@ -62,6 +63,7 @@
       "dependsOn": [
         "^build-BE"
       ],
+      "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "clean install -DskipTests -DskipITs"
       }
@@ -75,6 +77,7 @@
       "outputs": [
         "{projectRoot}/target/surfire-reports"
       ],
+      "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "surefire:test arch-unit:arch-test"
       },
@@ -85,18 +88,30 @@
     "integrationtest-BE": {
       "cache": true,
       "inputs": [
-        "maven",
-        "^maven"
+        "defaultMaven",
+        "^defaultMaven"
       ],
       "outputs": [
         "{projectRoot}/target/failsafe-reports"
       ],
+      "executor": "@jnxplus/nx-maven:run-task",
       "options": {
         "task": "failsafe:integration-test"
       },
       "dependsOn": [
         "build-BE"
       ]
+    },
+    "format-BE": {
+      "inputs": [
+        "defaultMaven"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "prettier . --write"
+        ]
+      }
     },
     "e2e-ci--**/*": {
       "dependsOn": [

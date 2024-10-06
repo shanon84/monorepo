@@ -4,7 +4,6 @@
   "projectType": "library",
   "targets": {
     "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
     }
   },
   "tags": []

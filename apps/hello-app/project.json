@@ -5,7 +5,6 @@
   "sourceRoot": "./hello-app/src",
   "targets": {
     "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
     },
     "build-image": {
       "executor": "@jnxplus/nx-maven:run-task",
@@ -22,8 +21,11 @@
         "^build"
       ]
     },
+    "format-BE": {
+    },
+    "unittest-BE": {
+    },
     "integrationtest-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
     }
   },
   "tags": []

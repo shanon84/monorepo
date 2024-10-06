@@ -5,6 +5,8 @@
   "private": true,
   "packageManager": "yarn@4.4.1",
   "scripts": {
+    "format-BE": "nx run-many -t format-BE",
+    "format-BE:affected": "nx affected -t format-BE",
     "build-BE": "nx run-many -t build-BE",
     "build-BE:affected": "nx affected -t build-BE",
     "unittest-BE": "nx run-many -t unittest-BE",

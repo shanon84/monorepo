@@ -5,13 +5,12 @@
   "sourceRoot": "./my-lib1/src",
   "targets": {
     "build-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
     },
     "unittest-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
     },
     "integrationtest-BE": {
-      "executor": "@jnxplus/nx-maven:run-task"
+    },
+    "format-BE": {
     }
   },
   "tags": []
