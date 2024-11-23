@@ -133,5 +133,6 @@
         "cacheableOperations": ["build", "test", "lint", "e2e", "build-BE", "unittest-BE", "integrationtest-BE"]
       }
     }
-  }
+  },
+  "useLegacyCache": true
 }
