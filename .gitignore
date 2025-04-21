@@ -51,6 +51,7 @@ Thumbs.db
 .next
 out
 
+.allure/
 
 #maven
 target/

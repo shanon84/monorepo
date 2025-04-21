@@ -35,12 +35,14 @@
         <!-- TESTING -->
         <cucumber.version>7.22.0</cucumber.version>
         <archunit.version>1.4.0</archunit.version>
+        <allure-junit5.version>2.29.1</allure-junit5.version>
 
         <!-- PLUGINS -->
         <openapi-generator-maven-plugin.version>7.12.0</openapi-generator-maven-plugin.version>
         <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
         <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
         <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -58,6 +60,12 @@
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>
                 <version>${archunit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>${allure-junit5.version}</version>
             </dependency>
 
             <dependency>
@@ -112,6 +120,11 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>${flatten-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
