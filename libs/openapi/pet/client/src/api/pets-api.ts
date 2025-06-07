@@ -30,7 +30,7 @@ import type { PetDTO } from '../model';
 export const PetsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * 
+         * Create a pet
          * @summary Create a pet
          * @param {PetDTO} petDTO 
          * @param {*} [options] Override http request option.
@@ -66,7 +66,7 @@ export const PetsApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * 
+         * List all pets
          * @summary List all pets
          * @param {number} [limit] How many items to return at one time (max 100)
          * @param {*} [options] Override http request option.
@@ -101,7 +101,7 @@ export const PetsApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * 
+         * Info for a specific pet
          * @summary Info for a specific pet
          * @param {string} petId The id of the pet to retrieve
          * @param {*} [options] Override http request option.
@@ -110,8 +110,8 @@ export const PetsApiAxiosParamCreator = function (configuration?: Configuration)
         showPetById: async (petId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'petId' is not null or undefined
             assertParamExists('showPetById', 'petId', petId)
-            const localVarPath = `/pets/{petId}`
-                .replace(`{${"petId"}}`, encodeURIComponent(String(petId)));
+            const localVarPath = `/pets/{pet-id}`
+                .replace(`{${"pet-id"}}`, encodeURIComponent(String(petId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -145,7 +145,7 @@ export const PetsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PetsApiAxiosParamCreator(configuration)
     return {
         /**
-         * 
+         * Create a pet
          * @summary Create a pet
          * @param {PetDTO} petDTO 
          * @param {*} [options] Override http request option.
@@ -158,7 +158,7 @@ export const PetsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * List all pets
          * @summary List all pets
          * @param {number} [limit] How many items to return at one time (max 100)
          * @param {*} [options] Override http request option.
@@ -171,7 +171,7 @@ export const PetsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Info for a specific pet
          * @summary Info for a specific pet
          * @param {string} petId The id of the pet to retrieve
          * @param {*} [options] Override http request option.
@@ -194,7 +194,7 @@ export const PetsApiFactory = function (configuration?: Configuration, basePath?
     const localVarFp = PetsApiFp(configuration)
     return {
         /**
-         * 
+         * Create a pet
          * @summary Create a pet
          * @param {PetDTO} petDTO 
          * @param {*} [options] Override http request option.
@@ -204,7 +204,7 @@ export const PetsApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.createPets(petDTO, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * List all pets
          * @summary List all pets
          * @param {number} [limit] How many items to return at one time (max 100)
          * @param {*} [options] Override http request option.
@@ -214,7 +214,7 @@ export const PetsApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.listPets(limit, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Info for a specific pet
          * @summary Info for a specific pet
          * @param {string} petId The id of the pet to retrieve
          * @param {*} [options] Override http request option.
@@ -234,7 +234,7 @@ export const PetsApiFactory = function (configuration?: Configuration, basePath?
  */
 export class PetsApi extends BaseAPI {
     /**
-     * 
+     * Create a pet
      * @summary Create a pet
      * @param {PetDTO} petDTO 
      * @param {*} [options] Override http request option.
@@ -246,7 +246,7 @@ export class PetsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * List all pets
      * @summary List all pets
      * @param {number} [limit] How many items to return at one time (max 100)
      * @param {*} [options] Override http request option.
@@ -258,7 +258,7 @@ export class PetsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Info for a specific pet
      * @summary Info for a specific pet
      * @param {string} petId The id of the pet to retrieve
      * @param {*} [options] Override http request option.

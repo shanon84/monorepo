@@ -1,0 +1,34 @@
+extends: "spectral:oas"
+
+rules:
+  info-contact: off
+  info-description:
+    description: "Die API sollte eine Beschreibung haben."
+    message: "Das 'description'-Feld im Info-Block fehlt."
+    given: "$.info.description"
+    then:
+      function: truthy
+
+  info-version:
+    description: "Es muss eine API-Version angegeben sein."
+    message: "Das 'version'-Feld im Info-Block fehlt."
+    given: "$.info.version"
+    then:
+      function: truthy
+
+  paths-kebab-case:
+    description: "Alle Pfade sollen kebab-case verwenden (kleinbuchstaben und Bindestriche)."
+    message: "Pfadnamen sollten im kebab-case sein (z.B. /my-resource-name)."
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\\/[-a-z0-9{}]+)+$"
+
+  operation-description:
+    description: "Jede Operation (get, post, etc.) sollte eine Beschreibung haben."
+    message: "Operationen müssen eine 'description' haben."
+    given: "$.paths[*][*]"
+    then:
+      field: "description"
+      function: truthy

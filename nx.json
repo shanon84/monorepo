@@ -47,7 +47,7 @@
       ],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
-        "task": "clean install -DskipTests"
+        "task": "clean install -DskipTests -DskipITs"
       }
     },
     "generate-api": {
@@ -81,7 +81,7 @@
       ],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
-        "task": "surefire:test arch-unit:arch-test"
+        "task": "surefire:test arch-unit:arch-test -DskipITs"
       },
       "dependsOn": [
         "build-BE"
@@ -100,7 +100,7 @@
       ],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
-        "task": "jacoco:prepare-agent failsafe:integration-test jacoco:report"
+        "task": "jacoco:prepare-agent failsafe:integration-test jacoco:report -DskipTests"
       },
       "dependsOn": [
         "build-BE"

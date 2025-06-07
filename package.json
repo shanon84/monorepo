@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@4.6.0",
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "format-BE": "nx run-many -t format-BE",
     "format-BE:affected": "nx affected -t format-BE",

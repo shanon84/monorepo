@@ -40,6 +40,7 @@ public interface PetsApi {
 
     /**
      * POST /pets : Create a pet
+     * Create a pet
      *
      * @param petDTO  (required)
      * @return Null response (status code 201)
@@ -48,6 +49,7 @@ public interface PetsApi {
     @Operation(
         operationId = "createPets",
         summary = "Create a pet",
+        description = "Create a pet",
         tags = { "pets" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Null response"),
@@ -70,6 +72,7 @@ public interface PetsApi {
 
     /**
      * GET /pets : List all pets
+     * List all pets
      *
      * @param limit How many items to return at one time (max 100) (optional)
      * @return A paged array of pets (status code 200)
@@ -78,6 +81,7 @@ public interface PetsApi {
     @Operation(
         operationId = "listPets",
         summary = "List all pets",
+        description = "List all pets",
         tags = { "pets" },
         responses = {
             @ApiResponse(responseCode = "200", description = "A paged array of pets", content = {
@@ -100,7 +104,8 @@ public interface PetsApi {
 
 
     /**
-     * GET /pets/{petId} : Info for a specific pet
+     * GET /pets/{pet-id} : Info for a specific pet
+     * Info for a specific pet
      *
      * @param petId The id of the pet to retrieve (required)
      * @return Expected response to a valid request (status code 200)
@@ -109,6 +114,7 @@ public interface PetsApi {
     @Operation(
         operationId = "showPetById",
         summary = "Info for a specific pet",
+        description = "Info for a specific pet",
         tags = { "pets" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Expected response to a valid request", content = {
@@ -121,12 +127,12 @@ public interface PetsApi {
     )
     @RequestMapping(
         method = RequestMethod.GET,
-        value = "/pets/{petId}",
+        value = "/pets/{pet-id}",
         produces = { "application/json" }
     )
     
     ResponseEntity<PetDTO> showPetById(
-        @Parameter(name = "petId", description = "The id of the pet to retrieve", required = true, in = ParameterIn.PATH) @PathVariable("petId") String petId
+        @Parameter(name = "pet-id", description = "The id of the pet to retrieve", required = true, in = ParameterIn.PATH) @PathVariable("pet-id") String petId
     );
 
 }
