@@ -172,12 +172,8 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx-remotecache-minio",
+      "runner": "@nx/workspace/tasks-runners/default",
       "options": {
-        "accessKey": "minioadmin",
-        "secretKey": "minioadmin",
-        "url": "http://127.0.0.1:9000",
-        "bucket": "remotecache",
         "cacheableOperations": [
           "build",
           "test",
@@ -189,6 +185,5 @@
         ]
       }
     }
-  },
-  "useLegacyCache": true
+  }
 }
