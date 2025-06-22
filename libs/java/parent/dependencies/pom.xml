@@ -43,6 +43,7 @@
         <flatten-maven-plugin.version>1.7.1</flatten-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <exec-maven-plugin.version>3.5.1</exec-maven-plugin.version>
+        <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
     </properties>
 
     <dependencyManagement>
@@ -92,6 +93,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${dependency-check-maven.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.openapitools</groupId>
                     <artifactId>openapi-generator-maven-plugin</artifactId>

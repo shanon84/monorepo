@@ -79,6 +79,35 @@
                         <mainClass>${start-class}</mainClass>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+
+                    <configuration>
+                        <!-- Abbruch bei CVSS >= 8 -->
+                        <failBuildOnCVSS>8</failBuildOnCVSS>
+                        <!-- Build-Abbruch bei irgendeiner gefundenen Schwachstelle -->
+                        <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+                        <!-- Reportformate -->
+                        <formats>HTML,XML,JSON</formats>
+                        <!-- Ausgabeort -->
+                        <outputDirectory>${project.build.directory}/dependency-check-report</outputDirectory>
+                        <!-- Unterdrückungsdatei für False Positives -->
+                        <suppressionFiles>
+                            <suppressionFile>${project.basedir}/dependency-check-suppression.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+
+                    <executions>
+                        <execution>
+                            <id>owasp-dependency-check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <!-- Führt den Check in der verify-Phase aus -->
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>

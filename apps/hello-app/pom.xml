@@ -1,37 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>app-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../libs/java/parent/app-parent/pom.xml</relativePath>
+    </parent>
+
     <groupId>com.example</groupId>
-    <artifactId>parent</artifactId>
-    <version>${revision}</version>
-    <relativePath>../../libs/java/parent/parent/pom.xml</relativePath>
-  </parent>
+    <artifactId>hello-app</artifactId>
+    <name>hello-app</name>
+    <description>This project was generated with nx-maven</description>
 
-  <groupId>com.example</groupId>
-  <artifactId>hello-app</artifactId>
-  <name>hello-app</name>
-  <description>This project was generated with nx-maven</description>
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>my-lib1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>my-lib1</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>
