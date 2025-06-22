@@ -50,6 +50,24 @@
         "task": "clean install -DskipTests -DskipITs"
       }
     },
+    "owasp-BE": {
+      "cache": false,
+      "inputs": [
+        "defaultMaven",
+        "^defaultMaven"
+      ],
+      "outputs": [
+        "{projectRoot}/target",
+        "{options.outputDirLocalRepo}"
+      ],
+      "dependsOn": [
+        "build-BE"
+      ],
+      "executor": "@jnxplus/nx-maven:run-task",
+      "options": {
+        "task": "-Powasp-check dependency-check:check"
+      }
+    },
     "generate-api": {
       "cache": false,
       "inputs": [

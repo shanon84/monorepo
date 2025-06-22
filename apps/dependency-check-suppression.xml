@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression'
+        xsi:schemaLocation='https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression suppression.xsd'>
+    <!-- Beispiel für zukünftige Suppressions:
+    <suppress>
+        <cve>CVE-2023-1234</cve>
+        <notes>Wird durch internes Patchmanagement mitigiert</notes>
+    </suppress>
+    -->
+</suppressions>

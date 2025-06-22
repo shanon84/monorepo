@@ -9,6 +9,7 @@
     "format-BE:affected": "nx affected -t format-BE",
     "build-BE": "nx run-many -t build-BE",
     "build-BE:affected": "nx affected -t build-BE",
+    "owasp-BE": "nx run-many -t owasp-BE",
     "unittest-BE": "nx run-many -t unittest-BE",
     "unittest-BE:affected": "nx affected -t unittest-BE",
     "integrationtest-BE": "nx run-many -t integrationtest-BE",
