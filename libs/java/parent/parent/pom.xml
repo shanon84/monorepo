@@ -22,6 +22,7 @@
     <properties>
         <resource.delimiter>@</resource.delimiter>
         <skipITs>false</skipITs>
+        <additional.jvm.options>-XX:+EnableDynamicAgentLoading</additional.jvm.options>
     </properties>
 
     <dependencies>
@@ -142,6 +143,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>${additional.jvm.options}</argLine>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
