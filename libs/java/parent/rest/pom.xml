@@ -1,107 +1,115 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
     <groupId>com.example</groupId>
-    <artifactId>parent</artifactId>
-    <version>${revision}</version>
-    <relativePath>../parent/pom.xml</relativePath>
-  </parent>
+    <artifactId>rest</artifactId>
+    <packaging>pom</packaging>
+    <name>rest</name>
+    <description>This project was generated with nx-maven</description>
 
-  <groupId>com.example</groupId>
-  <artifactId>rest</artifactId>
-  <packaging>pom</packaging>
-  <name>rest</name>
-  <description>This project was generated with nx-maven</description>
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>global-annotations</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>global-annotations</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>global-annotations</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>archunit-global</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>com.societegenerale.commons</groupId>
-        <artifactId>arch-unit-maven-plugin</artifactId>
-        <configuration>
-          <skip>${skipTests}</skip>
-          <properties>
-            <archunit.propertyName>propertyValue</archunit.propertyName>
-          </properties>
-          <rules>
-            <preConfiguredRules>
-              <rule>com.societegenerale.commons.plugin.rules.NoStandardStreamRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoJunitAssertRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoJodaTimeRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoJavaUtilDateRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoPowerMockRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoPrefixForInterfacesRuleTest</rule>
-              <rule>com.societegenerale.commons.plugin.rules.NoPublicFieldRuleTest</rule>
-
-              <!-- you may want to use one of the below rules, but not both at same time -->
-              <rule>com.societegenerale.commons.plugin.rules.NoTestIgnoreWithoutCommentRuleTest</rule>
-
-              <rule>com.societegenerale.commons.plugin.rules.NoAutowiredFieldTest</rule>
-
-              <!-- <rule>com.example.archunit.LayeringTest</rule>-->
-            </preConfiguredRules>
-
-          </rules>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>test</phase>
-            <goals>
-              <goal>arch-test</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>global-annotations</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.example</groupId>
             <artifactId>archunit-global</artifactId>
             <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring-framework.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-  </build>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.societegenerale.commons</groupId>
+                <artifactId>arch-unit-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${skipTests}</skip>
+                    <properties>
+                        <archunit.propertyName>propertyValue</archunit.propertyName>
+                    </properties>
+                    <rules>
+                        <preConfiguredRules>
+                            <rule>com.societegenerale.commons.plugin.rules.NoStandardStreamRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoJunitAssertRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoJodaTimeRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoJavaUtilDateRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoPowerMockRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoPrefixForInterfacesRuleTest</rule>
+                            <rule>com.societegenerale.commons.plugin.rules.NoPublicFieldRuleTest</rule>
+
+                            <!-- you may want to use one of the below rules, but not both at same time -->
+                            <rule>com.societegenerale.commons.plugin.rules.NoTestIgnoreWithoutCommentRuleTest</rule>
+
+                            <rule>com.societegenerale.commons.plugin.rules.NoAutowiredFieldTest</rule>
+
+                            <!-- <rule>com.example.archunit.LayeringTest</rule>-->
+                        </preConfiguredRules>
+
+                    </rules>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>arch-test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.example</groupId>
+                        <artifactId>archunit-global</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                        <version>${spring-framework.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.mapstruct</groupId>
+                        <artifactId>mapstruct</artifactId>
+                        <version>${mapstruct.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 </project>
