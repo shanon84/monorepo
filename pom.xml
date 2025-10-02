@@ -25,6 +25,7 @@
         <module>libs/openapi/</module>
 
         <module>libs/java/my-lib1</module>
+        <module>libs/java/neo4j-node-orm</module>
         <module>apps/hello-app</module>
     </modules>
 

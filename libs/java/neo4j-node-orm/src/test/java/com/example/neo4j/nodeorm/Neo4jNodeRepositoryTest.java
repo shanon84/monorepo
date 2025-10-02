@@ -1,0 +1,142 @@
+package com.example.neo4j.nodeorm;
+
+import com.example.neo4j.nodeorm.testdata.CompanyNode;
+import com.example.neo4j.nodeorm.testdata.PersonNode;
+import com.example.neo4j.nodeorm.testdata.ProjectNode;
+import com.example.neo4j.nodeorm.testdata.SimpleNode;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class Neo4jNodeRepositoryTest {
+
+  @Test
+  void shouldSaveSimpleNodes() {
+    // Given
+    Neo4jNodeRepository<SimpleNode> repository = null; // TODO: Implementierung
+
+    SimpleNode node1 = new SimpleNode()
+        .setName("Node 1");
+
+    SimpleNode node2 = new SimpleNode()
+        .setName("Node 2");
+
+    List<SimpleNode> nodes = List.of(node1, node2);
+
+    // When
+    List<SimpleNode> savedNodes = repository.saveAll(nodes);
+
+    // Then
+    assertThat(savedNodes).hasSize(2);
+    assertThat(savedNodes.get(0).getId()).isNotNull();
+    assertThat(savedNodes.get(0).getName()).isEqualTo("Node 1");
+    assertThat(savedNodes.get(1).getId()).isNotNull();
+    assertThat(savedNodes.get(1).getName()).isEqualTo("Node 2");
+  }
+
+  @Test
+  void shouldSavePersonNodesWithProperties() {
+    // Given
+    Neo4jNodeRepository<PersonNode> repository = null; // TODO: Implementierung
+
+    PersonNode person1 = new PersonNode()
+        .setFirstName("John")
+        .setLastName("Doe")
+        .setBirthDate(LocalDate.of(1990, 5, 15))
+        .setAge(34);
+
+    PersonNode person2 = new PersonNode()
+        .setFirstName("Jane")
+        .setLastName("Smith")
+        .setBirthDate(LocalDate.of(1985, 8, 22))
+        .setAge(39);
+
+    List<PersonNode> persons = List.of(person1, person2);
+
+    // When
+    List<PersonNode> savedPersons = repository.saveAll(persons);
+
+    // Then
+    assertThat(savedPersons).hasSize(2);
+    assertThat(savedPersons.get(0).getId()).isNotNull();
+    assertThat(savedPersons.get(0).getFirstName()).isEqualTo("John");
+    assertThat(savedPersons.get(1).getLastName()).isEqualTo("Smith");
+  }
+
+  @Test
+  void shouldSaveCompanyNodesWithRelationships() {
+    // Given
+    Neo4jNodeRepository<CompanyNode> repository = null; // TODO: Implementierung
+
+    PersonNode employee1 = new PersonNode()
+        .setFirstName("Alice")
+        .setLastName("Johnson")
+        .setAge(28);
+
+    PersonNode employee2 = new PersonNode()
+        .setFirstName("Bob")
+        .setLastName("Williams")
+        .setAge(32);
+
+    CompanyNode company = new CompanyNode()
+        .setName("Tech Corp")
+        .setIndustry("Technology")
+        .setEmployees(List.of(employee1, employee2));
+
+    List<CompanyNode> companies = List.of(company);
+
+    // When
+    List<CompanyNode> savedCompanies = repository.saveAll(companies);
+
+    // Then
+    assertThat(savedCompanies).hasSize(1);
+    assertThat(savedCompanies.get(0).getId()).isNotNull();
+    assertThat(savedCompanies.get(0).getName()).isEqualTo("Tech Corp");
+    assertThat(savedCompanies.get(0).getEmployees()).hasSize(2);
+    assertThat(savedCompanies.get(0).getEmployees().get(0).getId()).isNotNull();
+  }
+
+  @Test
+  void shouldSaveProjectNodesWithBidirectionalRelationships() {
+    // Given
+    Neo4jNodeRepository<ProjectNode> repository = null; // TODO: Implementierung
+
+    PersonNode manager = new PersonNode()
+        .setFirstName("Sarah")
+        .setLastName("Connor")
+        .setAge(45);
+
+    PersonNode developer1 = new PersonNode()
+        .setFirstName("Tom")
+        .setLastName("Anderson")
+        .setAge(30);
+
+    PersonNode developer2 = new PersonNode()
+        .setFirstName("Lisa")
+        .setLastName("Brown")
+        .setAge(27);
+
+    ProjectNode project = new ProjectNode()
+        .setProjectName("Neo4j ORM")
+        .setStartDate(LocalDate.of(2024, 1, 1))
+        .setEndDate(LocalDate.of(2024, 12, 31))
+        .setProjectManager(manager)
+        .setTeamMembers(List.of(developer1, developer2));
+
+    List<ProjectNode> projects = List.of(project);
+
+    // When
+    List<ProjectNode> savedProjects = repository.saveAll(projects);
+
+    // Then
+    assertThat(savedProjects).hasSize(1);
+    assertThat(savedProjects.get(0).getId()).isNotNull();
+    assertThat(savedProjects.get(0).getProjectName()).isEqualTo("Neo4j ORM");
+    assertThat(savedProjects.get(0).getProjectManager()).isNotNull();
+    assertThat(savedProjects.get(0).getProjectManager().getId()).isNotNull();
+    assertThat(savedProjects.get(0).getTeamMembers()).hasSize(2);
+  }
+}

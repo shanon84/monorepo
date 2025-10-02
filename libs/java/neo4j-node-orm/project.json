@@ -1,0 +1,13 @@
+{
+  "name": "neo4j-node-orm",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "./neo4j-node-orm/src",
+  "targets": {
+    "build-BE": {},
+    "unittest-BE": {},
+    "integrationtest-BE": {},
+    "format-BE": {}
+  },
+  "tags": []
+}
