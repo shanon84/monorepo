@@ -1,5 +1,7 @@
 package com.example.neo4j.nodeorm.testdata;
 
+import ac.simons.neo4j.migrations.annotations.catalog.Required;
+import ac.simons.neo4j.migrations.annotations.catalog.Unique;
 import lombok.Data;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
@@ -13,14 +15,16 @@ import java.util.List;
 @Data
 public class CompanyNode {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue(GeneratedValue.UUIDGenerator.class)
+    private Long id;
 
-  private String name;
+    @Unique
+    private String name;
 
-  private String industry;
+    @Required
+    private String industry;
 
-  @Relationship(type = "EMPLOYS", direction = Relationship.Direction.OUTGOING)
-  private List<PersonNode> employees = new ArrayList<>();
+    @Relationship(type = "EMPLOYS", direction = Relationship.Direction.OUTGOING)
+    private List<PersonNode> employees = new ArrayList<>();
 }

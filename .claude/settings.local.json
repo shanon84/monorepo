@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nx build-BE:*)",
+      "Bash(nx unittest-BE:*)",
+      "Bash(nx integrationtest-BE:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -9,9 +9,9 @@ import org.springframework.data.neo4j.core.schema.Node;
 @Data
 public class SimpleNode {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue(GeneratedValue.UUIDGenerator.class)
+    private Long id;
 
-  private String name;
+    private String name;
 }

@@ -176,7 +176,8 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                        <allure.results.directory>${project.build.directory}/target/allure-results
+                        </allure.results.directory>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -204,7 +205,7 @@
                                 </configurationParameters>
                             </properties>
                             <systemPropertyVariables>
-                                <allure.results.directory>${project.build.directory}/allure-results
+                                <allure.results.directory>${project.build.directory}/target/allure-results
                                 </allure.results.directory>
                             </systemPropertyVariables>
                         </configuration>

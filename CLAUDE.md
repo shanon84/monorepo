@@ -3,6 +3,7 @@
 ## Projektübersicht
 
 Dies ist ein Java/TypeScript Nx Monorepo-Projekt mit:
+
 - **Backend**: Java 21, Spring Boot, Maven
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Build-System**: Nx 21.6.3 mit Maven-Integration
@@ -33,11 +34,29 @@ monorepo/
 
 - **Java Version**: 21
 - **Package Naming**: `com.example.*`
+- **Konfiguration**: Immer `application.yml` verwenden, NIEMALS `*.properties` Dateien
 - **Lombok**:
-  - `@Data` mit `@Accessors(chain = true)` verwenden
-  - VERBOTEN: `@Builder`, `@Value`, `@SneakyThrows`, `@Wither`, `@NoArgsConstructor`, `@AllArgsConstructor`
-  - Stattdessen: `@RequiredArgsConstructor` für Constructor Injection
-  - Lombok fügt automatisch `@Generated` Annotation hinzu
+    - **lombok.config**: Zentrale Konfiguration in `lombok.config` im Root-Verzeichnis
+        - `lombok.accessors.chain = true` ist GLOBAL aktiviert - NIEMALS `@Accessors(chain = true)` manuell hinzufügen!
+        - `lombok.addLombokGeneratedAnnotation = true` - automatische `@Generated` Annotation
+        - Verbotene Annotationen werden durch `flagUsage = ERROR` erzwungen
+    - **Model-Klassen**: Nur `@Data` für Entities/DTOs (chain = true ist bereits global gesetzt)
+    - **Service/Component-Klassen**: `@RequiredArgsConstructor` + entsprechende Spring-Annotation (`@Service`,
+      `@Controller`, `@Repository`, etc.)
+    - **Constructor Injection**: Immer `private final` Fields + `@RequiredArgsConstructor` verwenden
+    - **VERBOTEN** (via lombok.config): `@Builder`, `@Value`, `@SneakyThrows`, `@NoArgsConstructor`,
+      `@AllArgsConstructor`
+    - **NIEMALS** manuell Constructors schreiben - Lombok nutzen!
+    - **NIEMALS** `@Accessors(chain = true)` hinzufügen - ist bereits global gesetzt!
+- **Klassen-Typen**:
+    - Entweder Model-Klasse (`@Data`) ODER Component (`@Service`/`@Controller`/`@Repository`)
+    - Niemals beides mischen!
+- **Eigene Annotationen** (aus `com.example.global.annotations`):
+    - **`@Persistence`**: Für Klassen, die Cypher/DB-Aufrufe kapseln (wichtig für Jaeger Performance-Messung)
+    - **`@Properties`**: Für Klassen, die Properties aus `application.yml` auslesen (`@Configuration`)
+    - **`@Scheduler`**: Für Klassen, die Scheduling bereitstellen
+    - **`@Validator`**: Für Klassen, die rein validieren
+    - **`@IT`**: Für Integration Tests (statt `@SpringBootTest`)
 
 ### TypeScript/React
 
@@ -103,7 +122,15 @@ nx build-BE hello-app
 ### Java Tests
 
 - **Unit Tests**: Suffix `Test.java` (z.B. `HelloServiceTest.java`)
-- **Integration Tests**: Suffix `IT.java` (z.B. `HelloServiceIT.java`)
+    - Nur für sehr komplexe Service-Logik
+    - Vorzugsweise Integrationstests verwenden
+- **Integration Tests**: Suffix `IT.java` (z.B. `HelloServiceIT.java`) - **BEVORZUGT**
+    - Tatsächliche Interaktion zwischen Datenbank und Anwendung
+    - Docker Compose für Datenbanken (z.B. Neo4j)
+    - **KEINE Testcontainer** verwenden
+    - **`@IT` Annotation verwenden** (eigene Annotation aus `com.example.global.annotations`)
+    - **KEINE Constructor Injection** - stattdessen `@Autowired` auf Fields
+- **Test-Konfiguration**: `application.yml` in `src/test/resources/`
 - **ArchUnit Tests**: Separates Modul `libs/java/archunit/global/`
 - **Test Coverage**: JaCoCo aktiviert, Reports in `target/jacoco.exec`
 
@@ -143,6 +170,7 @@ nx build-BE hello-app
 ## Nx Cache
 
 Folgende Operations sind cacheable:
+
 - `build`, `test`, `lint`, `e2e`
 - `build-BE`, `unittest-BE`, `integrationtest-BE`
 
@@ -172,10 +200,44 @@ Folgende Operations sind cacheable:
 - Verwende `yarn *:affected` für schnellere Builds
 - Cache wird in `.nx/cache/` gespeichert
 
+## Projekt-Dokumentation
+
+### CLAUDE.md Dateien
+
+Einige Projekte/Bibliotheken haben eigene `CLAUDE.md` Dateien mit spezifischen Anweisungen:
+
+- `libs/java/neo4j-node-orm/CLAUDE.md` - Neo4j ORM Framework
+
+**WICHTIG**: Bei Anpassungen an Projekten:
+
+1. Prüfe, ob eine projekt-spezifische `CLAUDE.md` existiert
+2. Aktualisiere die `CLAUDE.md` bei strukturellen/architektonischen Änderungen
+3. Halte die Dokumentation synchron mit dem Code
+4. Bei neuen Konventionen/Patterns: Dokumentiere sie in der jeweiligen `CLAUDE.md`
+
 ## Hinweise für Claude
 
 - Bei Java-Code immer Lombok-Konventionen beachten
-- Vor größeren Änderungen: Tests ausführen
 - OpenAPI-Generated Code NICHT manuell editieren
 - Nx Dependency Graph berücksichtigen
 - Security Audits ernst nehmen
+- **CLAUDE.md Dateien aktuell halten**: Bei Änderungen an Projekten die entsprechende Dokumentation aktualisieren
+
+### Test-First Workflow (VERPFLICHTEND)
+
+**Bei JEDER Code-Änderung** MUSS folgender Workflow eingehalten werden:
+
+1. **Build ausführen**: `yarn build-BE` oder `nx build-BE <projekt-name>`
+2. **Unit Tests ausführen**: `yarn unittest-BE` oder `nx unittest-BE <projekt-name>`
+3. **Integration Tests ausführen**: `yarn integrationtest-BE` oder `nx integrationtest-BE <projekt-name>`
+4. **Bei Fehlschlägen**:
+    - **Test anpassen**: Wenn die fachliche Änderung korrekt ist und der Test veraltet
+    - **Code fixen**: Wenn die Implementierung fehlerhaft ist
+    - **Wiederhole Schritte 1-3** bis alle Tests grün sind
+
+**WICHTIG**:
+
+- Änderungen NIEMALS ohne erfolgreiche Tests committen
+- Affected-Targets verwenden für schnellere Feedbackzyklen: `yarn build-BE:affected`
+- Bei Neo4j-Projekten: Docker Compose starten (`docker-compose -f compose/docker-compose.yaml up -d`)
+- Formatierung vor Tests: `yarn format-BE`

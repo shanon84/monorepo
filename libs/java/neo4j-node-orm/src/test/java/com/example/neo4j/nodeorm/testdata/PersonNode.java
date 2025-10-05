@@ -12,17 +12,17 @@ import java.time.LocalDate;
 @Data
 public class PersonNode {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue(GeneratedValue.UUIDGenerator.class)
+    private Long id;
 
-  @Property("firstName")
-  private String firstName;
+    @Property("firstName")
+    private String firstName;
 
-  @Property("lastName")
-  private String lastName;
+    @Property("lastName")
+    private String lastName;
 
-  private LocalDate birthDate;
+    private LocalDate birthDate;
 
-  private Integer age;
+    private Integer age;
 }

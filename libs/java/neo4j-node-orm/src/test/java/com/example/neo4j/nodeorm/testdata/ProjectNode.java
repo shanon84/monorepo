@@ -14,19 +14,19 @@ import java.util.List;
 @Data
 public class ProjectNode {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue(GeneratedValue.UUIDGenerator.class)
+    private Long id;
 
-  private String projectName;
+    private String projectName;
 
-  private LocalDate startDate;
+    private LocalDate startDate;
 
-  private LocalDate endDate;
+    private LocalDate endDate;
 
-  @Relationship(type = "WORKS_ON", direction = Relationship.Direction.INCOMING)
-  private List<PersonNode> teamMembers = new ArrayList<>();
+    @Relationship(type = "WORKS_ON", direction = Relationship.Direction.INCOMING)
+    private List<PersonNode> teamMembers = new ArrayList<>();
 
-  @Relationship(type = "MANAGED_BY", direction = Relationship.Direction.OUTGOING)
-  private PersonNode projectManager;
+    @Relationship(type = "MANAGED_BY", direction = Relationship.Direction.OUTGOING)
+    private PersonNode projectManager;
 }

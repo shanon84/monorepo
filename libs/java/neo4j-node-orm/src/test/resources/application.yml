@@ -1,0 +1,13 @@
+spring:
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: password
+    pool:
+      log-leaked-sessions: false
+
+org:
+  neo4j:
+    migrations:
+      enabled: false
