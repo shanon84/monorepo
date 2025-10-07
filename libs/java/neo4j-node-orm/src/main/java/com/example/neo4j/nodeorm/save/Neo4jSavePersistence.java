@@ -1,4 +1,4 @@
-package com.example.neo4j.nodeorm.persistence;
+package com.example.neo4j.nodeorm.save;
 
 import com.example.global.annotations.Persistence;
 import com.example.neo4j.nodeorm.metadata.NodeMetadata;
@@ -14,13 +14,12 @@ import java.util.Map;
 
 @Persistence
 @RequiredArgsConstructor
-public class Neo4jPersistence {
+public class Neo4jSavePersistence {
 
     private final Neo4jClient neo4jClient;
 
-    public Map<Object, Object> saveNodesBulk(List<Object> nodes, NodeMetadata metadata) {
+    public void saveNodesBulk(List<Object> nodes, NodeMetadata metadata) {
         String nodeName = metadata.getNodeName();
-        String idPropertyName = metadata.getIdField().getFieldName();
 
         // Build UNWIND query for bulk insert
         StringBuilder cypher = new StringBuilder("UNWIND $nodes AS node\n");
@@ -30,29 +29,7 @@ public class Neo4jPersistence {
         // Prepare node data
         List<Map<String, Object>> nodeData = new ArrayList<>();
         for (Object node : nodes) {
-            Map<String, Object> properties = new HashMap<>();
-
-            // Add ID field to properties if present
-            try {
-                Object idValue = metadata.getIdField().getField().get(node);
-                if (idValue != null) {
-                    properties.put(idPropertyName, idValue);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to access ID field", e);
-            }
-
-            for (PropertyMetadata property : metadata.getProperties()) {
-                try {
-                    Object value = property.getField().get(node);
-                    if (value != null) {
-                        properties.put(property.getPropertyName(), value);
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Failed to access property: " + property.getFieldName(), e);
-                }
-            }
-
+            Map<String, Object> properties = extractNodeProperties(node, metadata);
             nodeData.add(Map.of("properties", properties));
         }
 
@@ -60,8 +37,31 @@ public class Neo4jPersistence {
         neo4jClient.query(cypher.toString())
                 .bind(nodeData).to("nodes")
                 .run();
+    }
 
-        return Map.of(); // No IDs to return, already generated before save
+    private Map<String, Object> extractNodeProperties(Object node, NodeMetadata metadata) {
+        Map<String, Object> properties = new HashMap<>();
+        String idPropertyName = metadata.getIdField().getFieldName();
+
+        try {
+            // Add ID field to properties if present
+            Object idValue = metadata.getIdField().getField().get(node);
+            if (idValue != null) {
+                properties.put(idPropertyName, idValue);
+            }
+
+            // Add all other properties
+            for (PropertyMetadata property : metadata.getProperties()) {
+                Object value = property.getField().get(node);
+                if (value != null) {
+                    properties.put(property.getPropertyName(), value);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to access field on node", e);
+        }
+
+        return properties;
     }
 
     public void createRelationshipsBulk(

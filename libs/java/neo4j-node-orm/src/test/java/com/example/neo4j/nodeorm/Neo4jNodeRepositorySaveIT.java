@@ -12,11 +12,12 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IT
-class Neo4jNodeRepositoryIT {
+class Neo4jNodeRepositorySaveIT {
 
     @Autowired
     private Neo4jClient neo4jClient;
@@ -41,7 +42,8 @@ class Neo4jNodeRepositoryIT {
         List<SimpleNode> nodes = List.of(node1, node2);
 
         // When
-        List<SimpleNode> savedNodes = repository.saveAll(nodes);
+        List<SimpleNode> savedNodes = StreamSupport.stream(repository.saveAll(nodes).spliterator(), false)
+                .toList();
 
         // Then
         assertThat(savedNodes).hasSize(2);
@@ -49,6 +51,10 @@ class Neo4jNodeRepositoryIT {
         assertThat(savedNodes.get(0).getName()).isEqualTo("Node 1");
         assertThat(savedNodes.get(1).getId()).isNotNull();
         assertThat(savedNodes.get(1).getName()).isEqualTo("Node 2");
+
+        // Verify with findById
+        SimpleNode foundNode1 = (SimpleNode) repository.findById(savedNodes.get(0).getId()).orElseThrow();
+        assertThat(foundNode1.getName()).isEqualTo("Node 1");
     }
 
     @Test
@@ -69,7 +75,8 @@ class Neo4jNodeRepositoryIT {
         List<PersonNode> persons = List.of(person1, person2);
 
         // When
-        List<PersonNode> savedPersons = repository.saveAll(persons);
+        List<PersonNode> savedPersons = StreamSupport.stream(repository.saveAll(persons).spliterator(), false)
+                .toList();
 
         // Then
         assertThat(savedPersons).hasSize(2);
@@ -99,7 +106,8 @@ class Neo4jNodeRepositoryIT {
         List<CompanyNode> companies = List.of(company);
 
         // When
-        List<CompanyNode> savedCompanies = repository.saveAll(companies);
+        List<CompanyNode> savedCompanies = StreamSupport.stream(repository.saveAll(companies).spliterator(), false)
+                .toList();
 
         // Then
         assertThat(savedCompanies).hasSize(1);
@@ -137,7 +145,8 @@ class Neo4jNodeRepositoryIT {
         List<ProjectNode> projects = List.of(project);
 
         // When
-        List<ProjectNode> savedProjects = repository.saveAll(projects);
+        List<ProjectNode> savedProjects = StreamSupport.stream(repository.saveAll(projects).spliterator(), false)
+                .toList();
 
         // Then
         assertThat(savedProjects).hasSize(1);
@@ -162,7 +171,8 @@ class Neo4jNodeRepositoryIT {
         List<PersonNode> persons = List.of(person);
 
         // When
-        List<PersonNode> savedPersons = repository.saveAll(persons);
+        List<PersonNode> savedPersons = StreamSupport.stream(repository.saveAll(persons).spliterator(), false)
+                .toList();
 
         // Then
         assertThat(savedPersons.get(0).getId()).isNotNull();

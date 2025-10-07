@@ -34,6 +34,12 @@ monorepo/
 
 - **Java Version**: 21
 - **Package Naming**: `com.example.*`
+- **Package-Struktur**:
+    - **Fachliche Packages** bevorzugen statt technischer
+    - **SCHLECHT**: `service`, `persistence`, `controller`, `repository`
+    - **GUT**: `save`, `find`, `delete`, `user`, `order`, etc.
+    - Beispiel: `com.example.neo4j.nodeorm.save` mit `Neo4jSaveService` und `Neo4jSavePersistence`
+    - Pro fachlichem Package: Service + Persistence + ggf. weitere Klassen
 - **Konfiguration**: Immer `application.yml` verwenden, NIEMALS `*.properties` Dateien
 - **Lombok**:
     - **lombok.config**: Zentrale Konfiguration in `lombok.config` im Root-Verzeichnis
@@ -51,6 +57,13 @@ monorepo/
 - **Klassen-Typen**:
     - Entweder Model-Klasse (`@Data`) ODER Component (`@Service`/`@Controller`/`@Repository`)
     - Niemals beides mischen!
+- **Delegate Pattern für Interface-Implementierungen**:
+    - Bei Implementierungen größerer Interfaces (z.B. `CrudRepository`, `JpaRepository`) immer Delegate Pattern
+      verwenden
+    - Die implementierende Klasse delegiert nur an weitere Services weiter
+    - Je nach Shared Code: Entweder aggregierende Services ODER einzelne Services pro Methode
+    - Beispiel: `Neo4jNodeRepositoryImpl` delegiert an `Neo4jPersistence`, `NodeValidator`, etc.
+    - **Keine Geschäftslogik** in der Interface-Implementierung selbst
 - **Eigene Annotationen** (aus `com.example.global.annotations`):
     - **`@Persistence`**: Für Klassen, die Cypher/DB-Aufrufe kapseln (wichtig für Jaeger Performance-Messung)
     - **`@Properties`**: Für Klassen, die Properties aus `application.yml` auslesen (`@Configuration`)
@@ -214,6 +227,18 @@ Einige Projekte/Bibliotheken haben eigene `CLAUDE.md` Dateien mit spezifischen A
 2. Aktualisiere die `CLAUDE.md` bei strukturellen/architektonischen Änderungen
 3. Halte die Dokumentation synchron mit dem Code
 4. Bei neuen Konventionen/Patterns: Dokumentiere sie in der jeweiligen `CLAUDE.md`
+
+**Workflow für neue Anweisungen**:
+
+Wenn der User eine grundsätzliche Anweisung gibt (z.B. "programmiere grundsätzlich nach Muster X"):
+
+1. **Globale Anweisungen** → In diese Root-`CLAUDE.md` einfügen
+    - Betrifft alle Projekte im Monorepo
+    - Allgemeine Konventionen, Code-Stil, Workflows
+
+2. **Projekt-spezifische Anweisungen** → In die entsprechende Projekt-`CLAUDE.md` einfügen
+    - Betrifft nur ein spezifisches Projekt/Bibliothek
+    - Architektur, Pattern, projektspezifische Regeln
 
 ## Hinweise für Claude
 

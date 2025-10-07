@@ -1,8 +1,9 @@
 package com.example.neo4j.nodeorm;
 
-import java.util.List;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
-public interface Neo4jNodeRepository {
+@NoRepositoryBean
+public interface Neo4jNodeRepository<T> extends CrudRepository<T, String> {
 
-    <T> List<T> saveAll(List<T> entities);
 }
