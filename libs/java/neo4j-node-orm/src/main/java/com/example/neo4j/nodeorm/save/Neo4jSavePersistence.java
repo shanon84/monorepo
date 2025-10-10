@@ -1,15 +1,12 @@
 package com.example.neo4j.nodeorm.save;
 
 import com.example.global.annotations.Persistence;
-import com.example.neo4j.nodeorm.metadata.AuditFieldMetadata;
 import com.example.neo4j.nodeorm.metadata.NodeMetadata;
 import com.example.neo4j.nodeorm.metadata.PropertyMetadata;
 import com.example.neo4j.nodeorm.metadata.RelationshipMetadata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,52 +18,32 @@ public class Neo4jSavePersistence {
 
     private final Neo4jClient neo4jClient;
 
-    public Map<Object, Boolean> saveNodesBulk(
+    public Map<Object, Object> saveNodesBulk(
             List<Object> nodes,
-            NodeMetadata metadata,
-            Map<Object, Map<String, Object>> auditValuesMap
+            NodeMetadata metadata
     ) {
         String nodeName = metadata.getNodeName();
         String idPropertyName = metadata.getIdField().getFieldName();
 
-        // Build UNWIND query for bulk MERGE
+        // Build UNWIND query for bulk CREATE (simplified - audit fields are now in properties)
         StringBuilder cypher = new StringBuilder("UNWIND $nodes AS node\n");
-        cypher.append("MERGE (n:").append(nodeName).append(" {")
-                .append(idPropertyName).append(": node.properties.").append(idPropertyName).append("})\n");
-
-        // Set properties on CREATE
-        cypher.append("ON CREATE SET n = node.properties, n.___wasCreated = true");
-        if (metadata.getAuditFields().hasAnyAuditFields()) {
-            cypher.append(", n += node.auditCreate");
-        }
-
-        // Set properties on MATCH (update)
-        cypher.append("\nON MATCH SET n += node.properties, n.___wasCreated = false");
-        if (metadata.getAuditFields().hasLastModifiedBy() || metadata.getAuditFields().hasLastModifiedDate()) {
-            cypher.append(", n += node.auditUpdate");
-        }
-
-        cypher.append("\nWITH n, node, n.___wasCreated AS wasCreated")
-                .append("\nREMOVE n.___wasCreated")
-                .append("\nRETURN node.tempId AS tempId, id(n) AS generatedId, wasCreated");
+        cypher.append("CREATE (n:").append(nodeName).append(")\n");
+        cypher.append("SET n = node.properties\n");
+        cypher.append("RETURN node.tempId AS tempId, id(n) AS generatedId");
 
         // Prepare node data
         List<Map<String, Object>> nodeData = new ArrayList<>();
         for (Object node : nodes) {
             Map<String, Object> properties = extractNodeProperties(node, metadata);
-            Map<String, Object> auditCreate = auditValuesMap.getOrDefault(node, new HashMap<>());
-            Map<String, Object> auditUpdate = extractAuditUpdateValues(auditValuesMap.get(node));
 
             Map<String, Object> nodeEntry = new HashMap<>();
             nodeEntry.put("tempId", System.identityHashCode(node));
             nodeEntry.put("properties", properties);
-            nodeEntry.put("auditCreate", auditCreate);
-            nodeEntry.put("auditUpdate", auditUpdate);
 
             nodeData.add(nodeEntry);
         }
 
-        // Execute bulk merge and collect results
+        // Execute bulk create and collect results
         List<Map<String, Object>> results = neo4jClient.query(cypher.toString())
                 .bind(nodeData).to("nodes")
                 .fetch()
@@ -74,31 +51,18 @@ public class Neo4jSavePersistence {
                 .stream()
                 .toList();
 
-        // Build map: node -> wasCreated
-        Map<Object, Boolean> creationStatusMap = new HashMap<>();
+        // Build map: node -> generatedId
+        Map<Object, Object> idMap = new HashMap<>();
         for (int i = 0; i < nodes.size(); i++) {
-            Object node = nodes.get(i);
             Map<String, Object> result = results.get(i);
-            Boolean wasCreated = (Boolean) result.get("wasCreated");
-            creationStatusMap.put(node, wasCreated);
+            Long generatedId = (Long) result.get("generatedId");
+
+            // Map node to generatedId
+            Object node = nodes.get(i);
+            idMap.put(node, generatedId);
         }
 
-        return creationStatusMap;
-    }
-
-    private Map<String, Object> extractAuditUpdateValues(Map<String, Object> auditValues) {
-        if (auditValues == null) {
-            return new HashMap<>();
-        }
-
-        Map<String, Object> updateValues = new HashMap<>();
-        auditValues.forEach((key, value) -> {
-            if (key.startsWith("lastModified")) {
-                updateValues.put(key, value);
-            }
-        });
-
-        return updateValues;
+        return idMap;
     }
 
     private Map<String, Object> extractNodeProperties(Object node, NodeMetadata metadata) {
@@ -112,7 +76,7 @@ public class Neo4jSavePersistence {
                 properties.put(idPropertyName, idValue);
             }
 
-            // Add all other properties (excluding audit fields)
+            // Add all other properties (including audit fields now)
             for (PropertyMetadata property : metadata.getProperties()) {
                 Object value = property.getField().get(node);
                 if (value != null) {
@@ -126,43 +90,6 @@ public class Neo4jSavePersistence {
         return properties;
     }
 
-    public Map<String, Object> extractAuditProperties(Object node, AuditFieldMetadata auditFields) {
-        Map<String, Object> auditProperties = new HashMap<>();
-
-        try {
-            if (auditFields.hasCreatedBy()) {
-                Object value = auditFields.getCreatedByField().get(node);
-                if (value != null) {
-                    auditProperties.put(auditFields.getCreatedByField().getName(), value);
-                }
-            }
-
-            if (auditFields.hasCreatedDate()) {
-                Object value = auditFields.getCreatedDateField().get(node);
-                if (value != null) {
-                    auditProperties.put(auditFields.getCreatedDateField().getName(), value);
-                }
-            }
-
-            if (auditFields.hasLastModifiedBy()) {
-                Object value = auditFields.getLastModifiedByField().get(node);
-                if (value != null) {
-                    auditProperties.put(auditFields.getLastModifiedByField().getName(), value);
-                }
-            }
-
-            if (auditFields.hasLastModifiedDate()) {
-                Object value = auditFields.getLastModifiedDateField().get(node);
-                if (value != null) {
-                    auditProperties.put(auditFields.getLastModifiedDateField().getName(), value);
-                }
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to access audit field on node", e);
-        }
-
-        return auditProperties;
-    }
 
     public void createRelationshipsBulk(
             Object sourceId,

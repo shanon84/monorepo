@@ -42,6 +42,8 @@ public class NodeMetadataExtractor {
                 metadata.getRelationships().add(extractRelationship(field));
             } else if (isAuditField(field)) {
                 extractAuditField(field, metadata.getAuditFields());
+                // Also add audit fields as properties so they are persisted
+                metadata.getProperties().add(extractProperty(field));
             } else {
                 metadata.getProperties().add(extractProperty(field));
             }

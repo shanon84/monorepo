@@ -1,22 +1,20 @@
 package com.example.neo4j.nodeorm.save;
 
-import com.example.neo4j.nodeorm.audit.AuditProvider;
-import com.example.neo4j.nodeorm.metadata.AuditFieldMetadata;
 import com.example.neo4j.nodeorm.metadata.NodeMetadata;
 import com.example.neo4j.nodeorm.metadata.NodeMetadataExtractor;
 import com.example.neo4j.nodeorm.metadata.RelationshipMetadata;
+import com.example.neo4j.nodeorm.reflection.ReflectionService;
 import com.example.neo4j.nodeorm.validation.NodeValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,236 +23,90 @@ public class Neo4jSaveService {
     private final Neo4jSavePersistence savePersistence;
     private final NodeValidator nodeValidator;
     private final NodeMetadataExtractor metadataExtractor;
-    private final AuditProvider auditProvider;
+    private final IdGenerationService idGenerationService;
+    private final AuditFieldPopulatorService auditFieldPopulatorService;
+    private final ReflectionService reflectionService;
 
     public <S> List<S> saveAll(List<S> entities) {
-        nodeValidator.validateNodes(entities);
-
-        Class<?> entityClass = entities.get(0).getClass();
-        NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
-
         // Collect all nodes to save (including related nodes)
-        Map<Object, Object> allNodesToSave = new LinkedHashMap<>();
+        Set<Object> allNodesToSave = new LinkedHashSet<>();
         Map<Object, NodeMetadata> nodeMetadataMap = new HashMap<>();
 
         for (Object entity : entities) {
-            collectNodesToSave(entity, metadata, allNodesToSave, nodeMetadataMap);
+            collectNodesToSave(entity, allNodesToSave, nodeMetadataMap);
         }
 
-        // Generate IDs for nodes with @GeneratedValue before saving
-        Map<Object, Object> nodeIdMap = generateIdsForNodes(allNodesToSave, nodeMetadataMap);
+        // Process each node: validate, generate ID, set audit fields
+        // Use ID (or temp ID) as key for all subsequent operations
+        Map<Object, Object> nodeIdMap = new LinkedHashMap<>();
 
-        // Populate audit fields for all nodes
-        Map<Object, Map<String, Object>> auditValuesMap = populateAuditFields(allNodesToSave, nodeMetadataMap);
+        for (Object node : allNodesToSave) {
+            // 1. Validate
+            nodeValidator.validateNodeAnnotation(node.getClass());
 
-        // Save all nodes in bulk
-        saveNodesInBulk(allNodesToSave, nodeMetadataMap, auditValuesMap);
+            // 2. Get metadata
+            NodeMetadata metadata = metadataExtractor.extractMetadata(node.getClass());
 
-        // Create relationships
-        createRelationships(entities, metadata, nodeIdMap);
+            // 3. Determine if create or update (BEFORE generating ID)
+            boolean isCreate = isNewNode(node, metadata);
+
+            // 4. Generate or get ID
+            Object nodeId = getOrGenerateId(node, metadata);
+            nodeIdMap.put(node, nodeId);
+
+            // 5. Set audit fields directly on entity
+            auditFieldPopulatorService.populateAuditFieldsOnNode(node, metadata, isCreate);
+        }
+
+        // 6. Extract properties from entities (last step - after audit fields are set)
+        // 7. Save all nodes in bulk
+        saveNodesInBulk(allNodesToSave, nodeIdMap);
+
+        // 8. Create relationships
+        for (Object entity : entities) {
+            NodeMetadata metadata = metadataExtractor.extractMetadata(entity.getClass());
+            createRelationshipsForEntity(entity, metadata, nodeIdMap);
+        }
 
         return entities;
     }
 
-    private Map<Object, Map<String, Object>> populateAuditFields(
-            Map<Object, Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
-    ) {
-        Map<Object, Map<String, Object>> auditValuesMap = new HashMap<>();
-        String currentUser = auditProvider.getCurrentUser();
-        LocalDateTime currentTimestamp = auditProvider.getCurrentTimestamp();
+    private Object getOrGenerateId(Object node, NodeMetadata metadata) {
+        Object currentId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
 
-        for (Object node : allNodesToSave.keySet()) {
-            NodeMetadata metadata = nodeMetadataMap.get(node);
-            if (metadata == null || !metadata.getAuditFields().hasAnyAuditFields()) {
-                continue;
-            }
-
-            AuditFieldMetadata auditFields = metadata.getAuditFields();
-            Map<String, Object> auditValues = new HashMap<>();
-
-            try {
-                // Set createdBy and createdDate (always for new nodes)
-                if (auditFields.hasCreatedBy()) {
-                    setFieldValue(auditFields.getCreatedByField(), node, currentUser);
-                    auditValues.put(auditFields.getCreatedByField().getName(), currentUser);
-                }
-
-                if (auditFields.hasCreatedDate()) {
-                    setFieldValue(auditFields.getCreatedDateField(), node, currentTimestamp);
-                    auditValues.put(auditFields.getCreatedDateField().getName(), currentTimestamp);
-                }
-
-                // Set lastModifiedBy and lastModifiedDate (for both new and updated nodes)
-                if (auditFields.hasLastModifiedBy()) {
-                    setFieldValue(auditFields.getLastModifiedByField(), node, currentUser);
-                    auditValues.put(auditFields.getLastModifiedByField().getName(), currentUser);
-                }
-
-                if (auditFields.hasLastModifiedDate()) {
-                    setFieldValue(auditFields.getLastModifiedDateField(), node, currentTimestamp);
-                    auditValues.put(auditFields.getLastModifiedDateField().getName(), currentTimestamp);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to set audit fields on node: " + node.getClass().getName(), e);
-            }
-
-            auditValuesMap.put(node, auditValues);
-        }
-
-        return auditValuesMap;
-    }
-
-    private Map<Object, Object> generateIdsForNodes(
-            Map<Object, Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
-    ) {
-        Map<Class<?>, Object> generatorCache = new HashMap<>();
-        Map<Object, Object> nodeIdMap = new LinkedHashMap<>();
-
-        for (Map.Entry<Object, Object> entry : allNodesToSave.entrySet()) {
-            Object node = entry.getKey();
-            NodeMetadata metadata = nodeMetadataMap.get(node);
-
-            if (metadata == null) {
-                continue;
-            }
-
-            Object nodeId = generateOrGetNodeId(node, metadata, generatorCache);
-            if (nodeId != null) {
-                nodeIdMap.put(node, nodeId);
-            }
-        }
-
-        return nodeIdMap;
-    }
-
-    private Object generateOrGetNodeId(Object node, NodeMetadata metadata, Map<Class<?>, Object> generatorCache) {
-        Field idField = metadata.getIdField().getField();
-        Object currentId = getFieldValue(idField, node);
-
+        // If ID already exists, return it
         if (currentId != null) {
             return currentId;
         }
 
-        if (!metadata.getIdField().isGenerated()) {
-            return null;
-        }
-
-        GeneratedValue generatedValue = idField.getAnnotation(GeneratedValue.class);
-
-        // Try value() first (e.g. @GeneratedValue(UUIDGenerator.class)), then generatorClass()
-        Class<?> generatorClass = generatedValue.value();
-
-        // If value is not set, use generatorClass (deprecated but still supported)
-        if (generatorClass == null || generatorClass.getName().contains("InternalIdGenerator")) {
-            generatorClass = generatedValue.generatorClass();
-        }
-
-        return generateIdWithGenerator(node, metadata, idField, generatorClass, generatorCache);
-    }
-
-    private Object generateIdWithGenerator(
-            Object node,
-            NodeMetadata metadata,
-            Field idField,
-            Class<?> generatorClass,
-            Map<Class<?>, Object> generatorCache
-    ) {
-        Object generator = generatorCache.computeIfAbsent(generatorClass, this::instantiateGenerator);
-
-        Object generatedId = invokeGenerateId(generator, generatorClass, metadata.getNodeName(), node);
-
-        if (generatedId == null) {
-            throw new RuntimeException("ID generator " + generatorClass.getName() +
-                    " returned null for entity " + node.getClass().getName());
-        }
-
-        Object convertedId = convertIdToFieldType(generatedId, idField.getType());
-        setFieldValue(idField, node, convertedId);
-
-        return convertedId;
-    }
-
-    private Object instantiateGenerator(Class<?> generatorClass) {
-        try {
-            return generatorClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to instantiate ID generator: " + generatorClass.getName(), e);
-        }
-    }
-
-    private Object invokeGenerateId(Object generator, Class<?> generatorClass, String nodeName, Object node) {
-        try {
-            return generatorClass.getMethod("generateId", String.class, Object.class)
-                    .invoke(generator, nodeName, node);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("ID generator " + generatorClass.getName() +
-                    " must have a method: Object generateId(String primaryLabel, Object entity)", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to invoke generateId on " + generatorClass.getName(), e);
-        }
-    }
-
-    private Object getFieldValue(Field field, Object object) {
-        try {
-            return field.get(object);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to access field: " + field.getName(), e);
-        }
-    }
-
-    private void setFieldValue(Field field, Object object, Object value) {
-        try {
-            field.set(object, value);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to set field: " + field.getName(), e);
-        }
-    }
-
-    private Object convertIdToFieldType(Object generatedId, Class<?> fieldType) {
-        // If types match, return as-is
-        if (fieldType.isInstance(generatedId)) {
+        // Generate ID if field has @GeneratedValue
+        if (metadata.getIdField().isGenerated()) {
+            Object generatedId = idGenerationService.generateIdValue(node, metadata);
+            reflectionService.setFieldValue(metadata.getIdField().getField(), node, generatedId);
             return generatedId;
         }
 
-        // Convert UUID to String
-        if (generatedId instanceof java.util.UUID && fieldType == String.class) {
-            return generatedId.toString();
-        }
+        // No ID and not generated - will be set by Neo4j
+        // Use temp ID for now (system identity hash code)
+        return System.identityHashCode(node);
+    }
 
-        // Convert UUID to Long (hash code)
-        if (generatedId instanceof java.util.UUID && (fieldType == Long.class || fieldType == long.class)) {
-            return (long) generatedId.hashCode();
-        }
-
-        // Convert String UUID to Long (hash code)
-        if (generatedId instanceof String && fieldType == Long.class) {
-            return (long) generatedId.hashCode();
-        }
-
-        // Try to convert to Long
-        if (fieldType == Long.class || fieldType == long.class) {
-            if (generatedId instanceof Number) {
-                return ((Number) generatedId).longValue();
-            }
-        }
-
-        // Return as-is and let reflection handle the conversion/error
-        return generatedId;
+    private boolean isNewNode(Object node, NodeMetadata metadata) {
+        Object currentId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
+        return currentId == null || (currentId instanceof Number && ((Number) currentId).longValue() == 0);
     }
 
     private void collectNodesToSave(
             Object entity,
-            NodeMetadata metadata,
-            Map<Object, Object> allNodesToSave,
+            Set<Object> allNodesToSave,
             Map<Object, NodeMetadata> nodeMetadataMap
     ) {
-        if (entity == null || allNodesToSave.containsKey(entity)) {
+        if (entity == null || allNodesToSave.contains(entity)) {
             return;
         }
 
-        allNodesToSave.put(entity, entity);
+        allNodesToSave.add(entity);
+        NodeMetadata metadata = metadataExtractor.extractMetadata(entity.getClass());
         nodeMetadataMap.put(entity, metadata);
 
         collectRelatedNodes(entity, metadata, allNodesToSave, nodeMetadataMap);
@@ -263,44 +115,40 @@ public class Neo4jSaveService {
     private void collectRelatedNodes(
             Object entity,
             NodeMetadata metadata,
-            Map<Object, Object> allNodesToSave,
+            Set<Object> allNodesToSave,
             Map<Object, NodeMetadata> nodeMetadataMap
     ) {
         for (RelationshipMetadata relationship : metadata.getRelationships()) {
-            Object relatedValue = getFieldValue(relationship.getField(), entity);
+            Object relatedValue = reflectionService.getFieldValue(relationship.getField(), entity);
 
             if (relatedValue == null) {
                 continue;
             }
 
-            NodeMetadata relatedMetadata = metadataExtractor.extractMetadata(relationship.getTargetType());
-
             if (relationship.isCollection()) {
-                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, relatedMetadata, allNodesToSave, nodeMetadataMap);
+                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, allNodesToSave, nodeMetadataMap);
             } else {
-                collectNodesToSave(relatedValue, relatedMetadata, allNodesToSave, nodeMetadataMap);
+                collectNodesToSave(relatedValue, allNodesToSave, nodeMetadataMap);
             }
         }
     }
 
     private void collectRelatedEntitiesFromCollection(
             Collection<?> relatedEntities,
-            NodeMetadata relatedMetadata,
-            Map<Object, Object> allNodesToSave,
+            Set<Object> allNodesToSave,
             Map<Object, NodeMetadata> nodeMetadataMap
     ) {
         for (Object relatedEntity : relatedEntities) {
-            collectNodesToSave(relatedEntity, relatedMetadata, allNodesToSave, nodeMetadataMap);
+            collectNodesToSave(relatedEntity, allNodesToSave, nodeMetadataMap);
         }
     }
 
     private void saveNodesInBulk(
-            Map<Object, Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap,
-            Map<Object, Map<String, Object>> auditValuesMap
+            Set<Object> allNodesToSave,
+            Map<Object, Object> nodeIdMap
     ) {
         // Group nodes by type
-        Map<Class<?>, List<Object>> nodesByType = allNodesToSave.values().stream()
+        Map<Class<?>, List<Object>> nodesByType = allNodesToSave.stream()
                 .collect(java.util.stream.Collectors.groupingBy(Object::getClass));
 
         // Save each type in bulk
@@ -309,13 +157,10 @@ public class Neo4jSaveService {
             List<Object> nodes = entry.getValue();
             NodeMetadata metadata = metadataExtractor.extractMetadata(nodeClass);
 
-            savePersistence.saveNodesBulk(nodes, metadata, auditValuesMap);
-        }
-    }
+            Map<Object, Object> generatedIds = savePersistence.saveNodesBulk(nodes, metadata);
 
-    private <T> void createRelationships(List<T> entities, NodeMetadata metadata, Map<Object, Object> nodeIdMap) {
-        for (T entity : entities) {
-            createRelationshipsForEntity(entity, metadata, nodeIdMap);
+            // Update the nodeIdMap with generated IDs from Neo4j
+            nodeIdMap.putAll(generatedIds);
         }
     }
 
@@ -338,7 +183,7 @@ public class Neo4jSaveService {
             NodeMetadata sourceMetadata,
             Map<Object, Object> nodeIdMap
     ) {
-        Object relatedValue = getFieldValue(relationship.getField(), entity);
+        Object relatedValue = reflectionService.getFieldValue(relationship.getField(), entity);
 
         if (relatedValue == null) {
             return;
