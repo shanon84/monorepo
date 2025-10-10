@@ -6,7 +6,7 @@
       "Bash(nx integrationtest-BE:*)",
       "Bash(prettier:*)",
       "Bash(yarn format-BE:*)",
-      "Bash(docker-compose:*)"
+      "Bash(podman compose:*)"
     ],
     "deny": [],
     "ask": []

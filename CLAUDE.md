@@ -19,7 +19,7 @@ nx unittest-BE <projekt-name>
 nx integrationtest-BE <projekt-name>
 
 # Neo4j für Tests starten
-docker-compose -f compose/docker-compose.yaml up -d
+podman compose -f compose/docker-compose.yaml up -d
 
 # Nx Cache zurücksetzen
 nx reset
@@ -217,16 +217,16 @@ nx integrationtest-BE neo4j-node-orm
 
 ```bash
 # Neo4j starten
-docker-compose -f compose/docker-compose.yaml up -d
+podman compose -f compose/docker-compose.yaml up -d
 
 # Neo4j stoppen
-docker-compose -f compose/docker-compose.yaml down
+podman compose -f compose/docker-compose.yaml down
 
 # Logs ansehen
-docker-compose -f compose/docker-compose.yaml logs -f neo4j
+podman compose -f compose/docker-compose.yaml logs -f neo4j
 
 # Status prüfen
-docker-compose -f compose/docker-compose.yaml ps
+podman compose -f compose/docker-compose.yaml ps
 ```
 
 **Zugriff**:
@@ -241,16 +241,16 @@ Der Nx Remote Cache ermöglicht das Teilen von Build-Caches zwischen Entwicklern
 
 ```bash
 # Nx Remote Cache starten (MinIO + nx-cache-server)
-docker-compose -f compose/docker-compose-nxcache.yaml up -d
+podman compose -f compose/docker-compose-nxcache.yaml up -d
 
 # Nx Remote Cache stoppen
-docker-compose -f compose/docker-compose-nxcache.yaml down
+podman compose -f compose/docker-compose-nxcache.yaml down
 
 # Logs ansehen
-docker-compose -f compose/docker-compose-nxcache.yaml logs -f
+podman compose -f compose/docker-compose-nxcache.yaml logs -f
 
 # Status prüfen
-docker-compose -f compose/docker-compose-nxcache.yaml ps
+podman compose -f compose/docker-compose-nxcache.yaml ps
 ```
 
 **Zugriff**:
@@ -358,10 +358,10 @@ yarn build-BE
 **Tests schlagen fehl: "Connection refused" (Neo4j)**
 
 ```bash
-# Lösung: Docker Compose Neo4j starten
-docker-compose -f compose/docker-compose.yaml up -d
+# Lösung: Podman Compose Neo4j starten
+podman compose -f compose/docker-compose.yaml up -d
 # Warten bis Neo4j bereit ist (ca. 10-30 Sekunden)
-docker-compose -f compose/docker-compose.yaml logs -f neo4j
+podman compose -f compose/docker-compose.yaml logs -f neo4j
 ```
 
 **Nx Cache Probleme / Builds nicht aktuell**
@@ -383,20 +383,20 @@ yarn build-BE:affected
 
 ```bash
 # Lösung: Neo4j Datenbank zurücksetzen
-docker-compose -f compose/docker-compose.yaml down -v
-docker-compose -f compose/docker-compose.yaml up -d
+podman compose -f compose/docker-compose.yaml down -v
+podman compose -f compose/docker-compose.yaml up -d
 ```
 
 **Port bereits belegt (7687, 7474)**
 
 ```bash
 # Neo4j Ports prüfen
-docker-compose -f compose/docker-compose.yaml ps
+podman compose -f compose/docker-compose.yaml ps
 lsof -i :7687
 lsof -i :7474
 
 # Container stoppen
-docker-compose -f compose/docker-compose.yaml down
+podman compose -f compose/docker-compose.yaml down
 ```
 
 ## Projekt-Dokumentation
@@ -455,5 +455,5 @@ Wenn der User eine grundsätzliche Anweisung gibt (z.B. "programmiere grundsätz
 
 - Änderungen NIEMALS ohne erfolgreiche Tests committen
 - Affected-Targets verwenden für schnellere Feedbackzyklen: `yarn build-BE:affected`
-- Bei Neo4j-Projekten: Docker Compose starten (`docker-compose -f compose/docker-compose.yaml up -d`)
+- Bei Neo4j-Projekten: Podman Compose starten (`podman compose -f compose/docker-compose.yaml up -d`)
 - Formatierung vor Tests: `yarn format-BE`

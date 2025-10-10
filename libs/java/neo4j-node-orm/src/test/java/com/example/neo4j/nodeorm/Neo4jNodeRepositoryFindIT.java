@@ -2,9 +2,12 @@ package com.example.neo4j.nodeorm;
 
 import com.example.global.annotations.IT;
 import com.example.neo4j.nodeorm.testdata.SimpleNode;
+import com.example.neo4j.nodeorm.testdata.SimpleNodeRepository;
+import com.example.neo4j.nodeorm.testdata.TestRepositoryConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.util.List;
@@ -13,13 +16,14 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IT
+@Import(TestRepositoryConfiguration.class)
 class Neo4jNodeRepositoryFindIT {
 
     @Autowired
     private Neo4jClient neo4jClient;
 
     @Autowired
-    private Neo4jNodeRepository repository;
+    private SimpleNodeRepository simpleNodeRepository;
 
     @AfterEach
     void cleanUp() {
@@ -31,10 +35,10 @@ class Neo4jNodeRepositoryFindIT {
         // Given
         SimpleNode node = new SimpleNode()
                 .setName("Test Node");
-        SimpleNode savedNode = (SimpleNode) repository.save(node);
+        SimpleNode savedNode = simpleNodeRepository.save(node);
 
         // When
-        SimpleNode foundNode = (SimpleNode) repository.findById(savedNode.getId()).orElseThrow();
+        SimpleNode foundNode = simpleNodeRepository.findById(savedNode.getId()).orElseThrow();
 
         // Then
         assertThat(foundNode).isNotNull();
@@ -46,10 +50,10 @@ class Neo4jNodeRepositoryFindIT {
     void shouldReturnEmptyWhenNodeNotFound() {
         // Given
         SimpleNode node = new SimpleNode().setName("Test");
-        repository.save(node);
+        simpleNodeRepository.save(node);
 
         // When
-        var result = repository.findById("non-existent-id");
+        var result = simpleNodeRepository.findById("non-existent-id");
 
         // Then
         assertThat(result).isEmpty();
@@ -59,11 +63,11 @@ class Neo4jNodeRepositoryFindIT {
     void shouldCheckIfNodeExists() {
         // Given
         SimpleNode node = new SimpleNode().setName("Test");
-        SimpleNode savedNode = (SimpleNode) repository.save(node);
+        SimpleNode savedNode = simpleNodeRepository.save(node);
 
         // When / Then
-        assertThat(repository.existsById(savedNode.getId())).isTrue();
-        assertThat(repository.existsById("non-existent-id")).isFalse();
+        assertThat(simpleNodeRepository.existsById(savedNode.getId())).isTrue();
+        assertThat(simpleNodeRepository.existsById("non-existent-id")).isFalse();
     }
 
     @Test
@@ -72,11 +76,10 @@ class Neo4jNodeRepositoryFindIT {
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
         SimpleNode node3 = new SimpleNode().setName("Node 3");
-        repository.saveAll(List.of(node1, node2, node3));
+        simpleNodeRepository.saveAll(List.of(node1, node2, node3));
 
         // When
-        List<SimpleNode> allNodes = StreamSupport.stream(repository.findAll().spliterator(), false)
-                .map(n -> (SimpleNode) n)
+        List<SimpleNode> allNodes = StreamSupport.stream(simpleNodeRepository.findAll().spliterator(), false)
                 .toList();
 
         // Then
@@ -91,15 +94,13 @@ class Neo4jNodeRepositoryFindIT {
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
         SimpleNode node3 = new SimpleNode().setName("Node 3");
-        List<SimpleNode> savedNodes = StreamSupport.stream(repository.saveAll(List.of(node1, node2, node3)).spliterator(), false)
-                .map(n -> (SimpleNode) n)
+        List<SimpleNode> savedNodes = StreamSupport.stream(simpleNodeRepository.saveAll(List.of(node1, node2, node3)).spliterator(), false)
                 .toList();
 
         List<String> idsToFind = List.of(savedNodes.get(0).getId(), savedNodes.get(2).getId());
 
         // When
-        List<SimpleNode> foundNodes = StreamSupport.stream(repository.findAllById(idsToFind).spliterator(), false)
-                .map(n -> (SimpleNode) n)
+        List<SimpleNode> foundNodes = StreamSupport.stream(simpleNodeRepository.findAllById(idsToFind).spliterator(), false)
                 .toList();
 
         // Then
@@ -113,10 +114,10 @@ class Neo4jNodeRepositoryFindIT {
         // Given
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
-        repository.saveAll(List.of(node1, node2));
+        simpleNodeRepository.saveAll(List.of(node1, node2));
 
         // When
-        long count = repository.count();
+        long count = simpleNodeRepository.count();
 
         // Then
         assertThat(count).isEqualTo(2);

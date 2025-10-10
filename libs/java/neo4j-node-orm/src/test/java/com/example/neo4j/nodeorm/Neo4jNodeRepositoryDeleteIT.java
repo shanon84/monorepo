@@ -2,9 +2,12 @@ package com.example.neo4j.nodeorm;
 
 import com.example.global.annotations.IT;
 import com.example.neo4j.nodeorm.testdata.SimpleNode;
+import com.example.neo4j.nodeorm.testdata.SimpleNodeRepository;
+import com.example.neo4j.nodeorm.testdata.TestRepositoryConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.util.List;
@@ -13,13 +16,14 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IT
+@Import(TestRepositoryConfiguration.class)
 class Neo4jNodeRepositoryDeleteIT {
 
     @Autowired
     private Neo4jClient neo4jClient;
 
     @Autowired
-    private Neo4jNodeRepository repository;
+    private SimpleNodeRepository simpleNodeRepository;
 
     @AfterEach
     void cleanUp() {
@@ -30,27 +34,27 @@ class Neo4jNodeRepositoryDeleteIT {
     void shouldDeleteNodeById() {
         // Given
         SimpleNode node = new SimpleNode().setName("To Delete");
-        SimpleNode savedNode = (SimpleNode) repository.save(node);
+        SimpleNode savedNode = simpleNodeRepository.save(node);
         String nodeId = savedNode.getId();
 
         // When
-        repository.deleteById(nodeId);
+        simpleNodeRepository.deleteById(nodeId);
 
         // Then
-        assertThat(repository.existsById(nodeId)).isFalse();
+        assertThat(simpleNodeRepository.existsById(nodeId)).isFalse();
     }
 
     @Test
     void shouldDeleteNode() {
         // Given
         SimpleNode node = new SimpleNode().setName("To Delete");
-        SimpleNode savedNode = (SimpleNode) repository.save(node);
+        SimpleNode savedNode = simpleNodeRepository.save(node);
 
         // When
-        repository.delete(savedNode);
+        simpleNodeRepository.delete(savedNode);
 
         // Then
-        assertThat(repository.existsById(savedNode.getId())).isFalse();
+        assertThat(simpleNodeRepository.existsById(savedNode.getId())).isFalse();
     }
 
     @Test
@@ -59,18 +63,17 @@ class Neo4jNodeRepositoryDeleteIT {
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
         SimpleNode node3 = new SimpleNode().setName("Node 3");
-        List<SimpleNode> savedNodes = StreamSupport.stream(repository.saveAll(List.of(node1, node2, node3)).spliterator(), false)
-                .map(n -> (SimpleNode) n)
+        List<SimpleNode> savedNodes = StreamSupport.stream(simpleNodeRepository.saveAll(List.of(node1, node2, node3)).spliterator(), false)
                 .toList();
 
         List<String> idsToDelete = List.of(savedNodes.get(0).getId(), savedNodes.get(1).getId());
 
         // When
-        repository.deleteAllById(idsToDelete);
+        simpleNodeRepository.deleteAllById(idsToDelete);
 
         // Then
-        assertThat(repository.count()).isEqualTo(1);
-        assertThat(repository.existsById(savedNodes.get(2).getId())).isTrue();
+        assertThat(simpleNodeRepository.count()).isEqualTo(1);
+        assertThat(simpleNodeRepository.existsById(savedNodes.get(2).getId())).isTrue();
     }
 
     @Test
@@ -78,15 +81,14 @@ class Neo4jNodeRepositoryDeleteIT {
         // Given
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
-        List<SimpleNode> savedNodes = StreamSupport.stream(repository.saveAll(List.of(node1, node2)).spliterator(), false)
-                .map(n -> (SimpleNode) n)
+        List<SimpleNode> savedNodes = StreamSupport.stream(simpleNodeRepository.saveAll(List.of(node1, node2)).spliterator(), false)
                 .toList();
 
         // When
-        repository.deleteAll(savedNodes);
+        simpleNodeRepository.deleteAll(savedNodes);
 
         // Then
-        assertThat(repository.count()).isEqualTo(0);
+        assertThat(simpleNodeRepository.count()).isEqualTo(0);
     }
 
     @Test
@@ -94,12 +96,12 @@ class Neo4jNodeRepositoryDeleteIT {
         // Given
         SimpleNode node1 = new SimpleNode().setName("Node 1");
         SimpleNode node2 = new SimpleNode().setName("Node 2");
-        repository.saveAll(List.of(node1, node2));
+        simpleNodeRepository.saveAll(List.of(node1, node2));
 
         // When
-        repository.deleteAll();
+        simpleNodeRepository.deleteAll();
 
         // Then
-        assertThat(repository.count()).isEqualTo(0);
+        assertThat(simpleNodeRepository.count()).isEqualTo(0);
     }
 }

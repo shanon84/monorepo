@@ -2,12 +2,18 @@ package com.example.neo4j.nodeorm;
 
 import com.example.global.annotations.IT;
 import com.example.neo4j.nodeorm.testdata.CompanyNode;
+import com.example.neo4j.nodeorm.testdata.CompanyNodeRepository;
 import com.example.neo4j.nodeorm.testdata.PersonNode;
+import com.example.neo4j.nodeorm.testdata.PersonNodeRepository;
 import com.example.neo4j.nodeorm.testdata.ProjectNode;
+import com.example.neo4j.nodeorm.testdata.ProjectNodeRepository;
 import com.example.neo4j.nodeorm.testdata.SimpleNode;
+import com.example.neo4j.nodeorm.testdata.SimpleNodeRepository;
+import com.example.neo4j.nodeorm.testdata.TestRepositoryConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.time.LocalDate;
@@ -17,13 +23,23 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IT
+@Import(TestRepositoryConfiguration.class)
 class Neo4jNodeRepositorySaveIT {
 
     @Autowired
     private Neo4jClient neo4jClient;
 
     @Autowired
-    private Neo4jNodeRepository repository;
+    private SimpleNodeRepository simpleNodeRepository;
+
+    @Autowired
+    private PersonNodeRepository personNodeRepository;
+
+    @Autowired
+    private CompanyNodeRepository companyNodeRepository;
+
+    @Autowired
+    private ProjectNodeRepository projectNodeRepository;
 
     @AfterEach
     void cleanUp() {
@@ -42,7 +58,7 @@ class Neo4jNodeRepositorySaveIT {
         List<SimpleNode> nodes = List.of(node1, node2);
 
         // When
-        List<SimpleNode> savedNodes = StreamSupport.stream(repository.saveAll(nodes).spliterator(), false)
+        List<SimpleNode> savedNodes = StreamSupport.stream(simpleNodeRepository.saveAll(nodes).spliterator(), false)
                 .toList();
 
         // Then
@@ -53,7 +69,7 @@ class Neo4jNodeRepositorySaveIT {
         assertThat(savedNodes.get(1).getName()).isEqualTo("Node 2");
 
         // Verify with findById
-        SimpleNode foundNode1 = (SimpleNode) repository.findById(savedNodes.get(0).getId()).orElseThrow();
+        SimpleNode foundNode1 = simpleNodeRepository.findById(savedNodes.get(0).getId()).orElseThrow();
         assertThat(foundNode1.getName()).isEqualTo("Node 1");
     }
 
@@ -75,7 +91,7 @@ class Neo4jNodeRepositorySaveIT {
         List<PersonNode> persons = List.of(person1, person2);
 
         // When
-        List<PersonNode> savedPersons = StreamSupport.stream(repository.saveAll(persons).spliterator(), false)
+        List<PersonNode> savedPersons = StreamSupport.stream(personNodeRepository.saveAll(persons).spliterator(), false)
                 .toList();
 
         // Then
@@ -106,7 +122,7 @@ class Neo4jNodeRepositorySaveIT {
         List<CompanyNode> companies = List.of(company);
 
         // When
-        List<CompanyNode> savedCompanies = StreamSupport.stream(repository.saveAll(companies).spliterator(), false)
+        List<CompanyNode> savedCompanies = StreamSupport.stream(companyNodeRepository.saveAll(companies).spliterator(), false)
                 .toList();
 
         // Then
@@ -145,7 +161,7 @@ class Neo4jNodeRepositorySaveIT {
         List<ProjectNode> projects = List.of(project);
 
         // When
-        List<ProjectNode> savedProjects = StreamSupport.stream(repository.saveAll(projects).spliterator(), false)
+        List<ProjectNode> savedProjects = StreamSupport.stream(projectNodeRepository.saveAll(projects).spliterator(), false)
                 .toList();
 
         // Then
@@ -171,7 +187,7 @@ class Neo4jNodeRepositorySaveIT {
         List<PersonNode> persons = List.of(person);
 
         // When
-        List<PersonNode> savedPersons = StreamSupport.stream(repository.saveAll(persons).spliterator(), false)
+        List<PersonNode> savedPersons = StreamSupport.stream(personNodeRepository.saveAll(persons).spliterator(), false)
                 .toList();
 
         // Then

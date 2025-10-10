@@ -95,15 +95,15 @@ public class PersonNode {
 
 - **Integration Tests**: `*IT.java` (z.B. `Neo4jNodeRepositoryIT.java`) - **BEVORZUGT**
     - **`@IT` Annotation verwenden** (aus `com.example.global.annotations`)
+    - **`@Import(TestRepositoryConfiguration.class)` hinzufügen** für typisierte Repositories
     - **KEINE Constructor Injection** - stattdessen `@Autowired` auf Fields
     - Tatsächliche Neo4j-Instanz über Docker Compose
     - **KEINE Testcontainer** verwenden
 - **Unit Tests**: `*Test.java` - nur für sehr komplexe Logik
-- **Test Data**: Separate Package `testdata/` mit Node-Klassen
-    - `SimpleNode.java`
-    - `PersonNode.java`
-    - `CompanyNode.java`
-    - `ProjectNode.java`
+- **Test Data**: Separate Package `testdata/` mit Node-Klassen und typisierten Repositories
+    - Node-Klassen: `SimpleNode.java`, `PersonNode.java`, `CompanyNode.java`, `ProjectNode.java`
+    - Repository-Interfaces: `SimpleNodeRepository.java`, `PersonNodeRepository.java`, etc.
+    - Test-Konfiguration: `TestRepositoryConfiguration.java`
 
 ### Test-Setup
 
@@ -113,7 +113,7 @@ public class PersonNode {
     - Migrations deaktivieren (`org.neo4j.migrations.enabled: false`)
 - **Field Injection**: `@Autowired` auf Fields verwenden (KEINE Constructor Injection in Tests!)
 - **Cleanup**: `@AfterEach` Methode zum Löschen aller Nodes (`MATCH (n) DETACH DELETE n`)
-- **Docker Compose**: Neo4j muss laufen (`docker-compose -f compose/docker-compose.yaml up -d`)
+- **Podman Compose**: Neo4j muss laufen (`podman compose -f compose/docker-compose.yaml up -d`)
 
 ## Performance-Optimierung
 
@@ -158,15 +158,84 @@ CREATE (source)-[:RELATIONSHIP_TYPE]->(target)
 
 ### Repository verwenden
 
-```java
+**Typisierte Repository-Interfaces (EMPFOHLEN)**:
 
+Für jede Node-Klasse sollte ein typisiertes Repository-Interface erstellt werden:
+
+```java
+public interface PersonNodeRepository extends Neo4jNodeRepository<PersonNode> {
+}
+```
+
+**Bean-Konfiguration für typisierte Repositories**:
+
+```java
+@TestConfiguration
+@RequiredArgsConstructor
+public class TestRepositoryConfiguration {
+
+    private final Neo4jSaveService saveService;
+    private final Neo4jFindService findService;
+    private final Neo4jDeleteService deleteService;
+
+    @Bean
+    public PersonNodeRepository personNodeRepository() {
+        return createTypedRepository(PersonNodeRepository.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T, R extends Neo4jNodeRepository<T>> R createTypedRepository(Class<R> repositoryInterface) {
+        Neo4jNodeRepositoryImpl<T> impl = new Neo4jNodeRepositoryImpl<>(saveService, findService, deleteService);
+
+        return (R) Proxy.newProxyInstance(
+                repositoryInterface.getClassLoader(),
+                new Class<?>[]{repositoryInterface},
+                (proxy, method, args) -> {
+                    try {
+                        return method.invoke(impl, args);
+                    } catch (Exception e) {
+                        throw e.getCause() != null ? e.getCause() : e;
+                    }
+                }
+        );
+    }
+}
+```
+
+**Verwendung in Services**:
+
+```java
 @RequiredArgsConstructor
 @Service
 public class MyService {
-    private final Neo4jNodeRepository<PersonNode> repository;
+    private final PersonNodeRepository personNodeRepository;
 
     public List<PersonNode> savePersons(List<PersonNode> persons) {
-        return repository.saveAll(persons);
+        return StreamSupport.stream(personNodeRepository.saveAll(persons).spliterator(), false)
+                .toList();
+    }
+}
+```
+
+**Verwendung in Tests**:
+
+```java
+@IT
+@Import(TestRepositoryConfiguration.class)
+class MyIntegrationTest {
+
+    @Autowired
+    private PersonNodeRepository personNodeRepository;
+
+    @Test
+    void shouldSavePerson() {
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe");
+
+        PersonNode saved = personNodeRepository.save(person);
+
+        assertThat(saved.getId()).isNotNull();
     }
 }
 ```
@@ -233,8 +302,10 @@ logging:
 
 - **BEVORZUGT**: Integration Tests (`*IT.java`) mit echter Neo4j-Instanz
 - **`@IT` Annotation verwenden** - NIEMALS `@SpringBootTest` direkt
+- **`@Import(TestRepositoryConfiguration.class)`**: Immer importieren für typisierte Repositories
 - **Field Injection**: `@Autowired` auf Fields - KEINE Constructor Injection in Tests!
 - **KEINE Testcontainer** verwenden - Docker Compose nutzen
+- **Typisierte Repositories**: Immer typisierte Repository-Interfaces verwenden (z.B. `PersonNodeRepository` statt raw `Neo4jNodeRepository`)
 
 ### Performance & Security
 
