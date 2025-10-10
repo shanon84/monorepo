@@ -22,7 +22,7 @@
     <properties>
         <resource.delimiter>@</resource.delimiter>
         <skipITs>false</skipITs>
-        <additional.jvm.options>-XX:+EnableDynamicAgentLoading</additional.jvm.options>
+        <additional.jvm.options>-XX:+EnableDynamicAgentLoading -Dallure.results.directory=${project.build.directory}/allure-results</additional.jvm.options>
     </properties>
 
     <dependencies>
@@ -176,7 +176,7 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/target/allure-results
+                        <allure.results.directory>${project.build.directory}/allure-results
                         </allure.results.directory>
                     </systemPropertyVariables>
                 </configuration>
@@ -184,6 +184,7 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
+                    <argLine>${additional.jvm.options}</argLine>
                     <skipITs>${skipITs}</skipITs>
                     <skipTests>${skipITs}</skipTests>
                 </configuration>
@@ -197,15 +198,8 @@
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
-                            <properties>
-                                <configurationParameters>
-                                    cucumber.publish.quiet=true
-                                    cucumber.publish.enabled=false
-                                    junit:target/cucumber-reports/Cucumber.xml
-                                </configurationParameters>
-                            </properties>
                             <systemPropertyVariables>
-                                <allure.results.directory>${project.build.directory}/target/allure-results
+                                <allure.results.directory>${project.build.directory}/allure-results
                                 </allure.results.directory>
                             </systemPropertyVariables>
                         </configuration>
@@ -229,6 +223,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <configuration>
+                    <resultsDirectory>${project.build.directory}/allure-results</resultsDirectory>
+                    <reportDirectory>${project.build.directory}/allure-reports</reportDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>
