@@ -1,4 +1,29 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Projekt-Anweisungen für Claude Code
+
+## Quick Reference
+
+```bash
+# Entwicklungs-Workflow (nur betroffene Projekte)
+yarn format-BE:affected          # Code formatieren
+yarn build-BE:affected           # Build (ohne Tests)
+yarn unittest-BE:affected        # Unit Tests
+yarn integrationtest-BE:affected # Integration Tests
+
+# Einzelnes Projekt
+nx build-BE <projekt-name>
+nx unittest-BE <projekt-name>
+nx integrationtest-BE <projekt-name>
+
+# Neo4j für Tests starten
+docker-compose -f compose/docker-compose.yaml up -d
+
+# Nx Cache zurücksetzen
+nx reset
+```
 
 ## Projektübersicht
 
@@ -119,6 +144,12 @@ nx affected:graph
 
 # Spezifisches Projekt builden
 nx build-BE hello-app
+nx build-BE neo4j-node-orm
+nx build-BE my-lib1
+
+# Einzelnes Projekt testen
+nx unittest-BE hello-app
+nx integrationtest-BE neo4j-node-orm
 ```
 
 ## Build-Targets (Nx)
@@ -180,12 +211,82 @@ nx build-BE hello-app
 - **Commit-Stil**: Konventionell (z.B. "fix:", "feat:", "refactor:")
 - Vor Commit: Tests und Build erfolgreich
 
+## Docker Services
+
+### Neo4j (für Integration Tests)
+
+```bash
+# Neo4j starten
+docker-compose -f compose/docker-compose.yaml up -d
+
+# Neo4j stoppen
+docker-compose -f compose/docker-compose.yaml down
+
+# Logs ansehen
+docker-compose -f compose/docker-compose.yaml logs -f neo4j
+
+# Status prüfen
+docker-compose -f compose/docker-compose.yaml ps
+```
+
+**Zugriff**:
+
+- Browser UI: http://localhost:7474
+- Bolt Protocol: bolt://localhost:7687
+- Credentials: `neo4j / password` (siehe `compose/docker-compose.yaml`)
+
+### Nx Remote Cache (optional, für Team-Entwicklung)
+
+Der Nx Remote Cache ermöglicht das Teilen von Build-Caches zwischen Entwicklern und CI/CD.
+
+```bash
+# Nx Remote Cache starten (MinIO + nx-cache-server)
+docker-compose -f compose/docker-compose-nxcache.yaml up -d
+
+# Nx Remote Cache stoppen
+docker-compose -f compose/docker-compose-nxcache.yaml down
+
+# Logs ansehen
+docker-compose -f compose/docker-compose-nxcache.yaml logs -f
+
+# Status prüfen
+docker-compose -f compose/docker-compose-nxcache.yaml ps
+```
+
+**Zugriff**:
+
+- Nx Cache Server: http://localhost:3000
+- MinIO Console: http://localhost:9001
+- MinIO S3 API: http://localhost:9000
+- Credentials: `minioadmin / minioadmin`
+
+**Konfiguration in nx.json**:
+
+```json
+{
+    "tasksRunnerOptions": {
+        "default": {
+            "runner": "@nx/workspace/tasks-runners/default",
+            "options": {
+                "cacheableOperations": ["build-BE", "unittest-BE", "integrationtest-BE"],
+                "remoteCache": {
+                    "url": "http://localhost:3000",
+                    "token": "my-secret-token"
+                }
+            }
+        }
+    }
+}
+```
+
 ## Nx Cache
 
 Folgende Operations sind cacheable:
 
 - `build`, `test`, `lint`, `e2e`
 - `build-BE`, `unittest-BE`, `integrationtest-BE`
+
+**Cache zurücksetzen**: `nx reset`
 
 ## Häufige Aufgaben
 
@@ -195,11 +296,40 @@ Folgende Operations sind cacheable:
 2. Nx `project.json` erstellen (falls benötigt)
 3. Parent POM referenzieren
 
-### Dependency aktualisieren
+### Dependencies aktualisieren
 
-1. In `package.json` Version ändern
-2. `yarn install` ausführen
-3. Tests ausführen
+**JavaScript/TypeScript**:
+
+```bash
+# Interaktive Auswahl
+yarn upgrade-interactive
+
+# Alle Dependencies aktualisieren
+yarn upgrade
+```
+
+**Maven**:
+
+```bash
+# Maven Dependencies aktualisieren (empfohlen)
+./scripts/update-maven-dependencies.sh
+
+# Manuell: Parent POM Versionen prüfen
+mvn versions:display-parent-updates
+
+# Manuell: Property-Versionen prüfen
+mvn versions:display-property-updates
+```
+
+**Nx**:
+
+```bash
+# Nx auf neueste Version migrieren
+nx migrate latest
+
+# Migrations ausführen
+nx migrate --run-migrations
+```
 
 ### OpenAPI ändern
 
@@ -213,11 +343,72 @@ Folgende Operations sind cacheable:
 - Verwende `yarn *:affected` für schnellere Builds
 - Cache wird in `.nx/cache/` gespeichert
 
+## Troubleshooting
+
+### Häufige Probleme
+
+**Build schlägt fehl: "Cannot resolve dependency"**
+
+```bash
+# Lösung: Local Maven Repository löschen und neu builden
+rm -rf .m2/repository
+yarn build-BE
+```
+
+**Tests schlagen fehl: "Connection refused" (Neo4j)**
+
+```bash
+# Lösung: Docker Compose Neo4j starten
+docker-compose -f compose/docker-compose.yaml up -d
+# Warten bis Neo4j bereit ist (ca. 10-30 Sekunden)
+docker-compose -f compose/docker-compose.yaml logs -f neo4j
+```
+
+**Nx Cache Probleme / Builds nicht aktuell**
+
+```bash
+# Lösung: Cache löschen und neu builden
+nx reset
+yarn build-BE:affected
+```
+
+**Lombok Annotationen funktionieren nicht in IDE**
+
+- Stelle sicher, dass Lombok Plugin in IDE installiert ist
+- Prüfe `lombok.config` im Root-Verzeichnis
+- IDE Projekt neu laden / reimport
+- Rebuild: `yarn build-BE`
+
+**Integration Tests schlagen fehl: "Schema mismatch"**
+
+```bash
+# Lösung: Neo4j Datenbank zurücksetzen
+docker-compose -f compose/docker-compose.yaml down -v
+docker-compose -f compose/docker-compose.yaml up -d
+```
+
+**Port bereits belegt (7687, 7474)**
+
+```bash
+# Neo4j Ports prüfen
+docker-compose -f compose/docker-compose.yaml ps
+lsof -i :7687
+lsof -i :7474
+
+# Container stoppen
+docker-compose -f compose/docker-compose.yaml down
+```
+
 ## Projekt-Dokumentation
 
 ### CLAUDE.md Dateien
 
-Einige Projekte/Bibliotheken haben eigene `CLAUDE.md` Dateien mit spezifischen Anweisungen:
+Das Monorepo nutzt ein hierarchisches Dokumentationssystem:
+
+- **Root `CLAUDE.md`** (diese Datei): Globale Konventionen für alle Projekte
+- **Projekt-spezifische `CLAUDE.md`**: Architektur und Patterns einzelner Libraries
+
+**Existierende projekt-spezifische Dokumentationen**:
 
 - `libs/java/neo4j-node-orm/CLAUDE.md` - Neo4j ORM Framework
 

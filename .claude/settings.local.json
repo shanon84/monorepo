@@ -3,7 +3,8 @@
     "allow": [
       "Bash(nx build-BE:*)",
       "Bash(nx unittest-BE:*)",
-      "Bash(nx integrationtest-BE:*)"
+      "Bash(nx integrationtest-BE:*)",
+      "Bash(prettier:*)"
     ],
     "deny": [],
     "ask": []
