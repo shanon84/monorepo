@@ -1,5 +1,7 @@
 package com.example.neo4j.nodeorm.save;
 
+import com.example.neo4j.nodeorm.audit.AuditProvider;
+import com.example.neo4j.nodeorm.metadata.AuditFieldMetadata;
 import com.example.neo4j.nodeorm.metadata.NodeMetadata;
 import com.example.neo4j.nodeorm.metadata.NodeMetadataExtractor;
 import com.example.neo4j.nodeorm.metadata.RelationshipMetadata;
@@ -9,6 +11,7 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -22,6 +25,7 @@ public class Neo4jSaveService {
     private final Neo4jSavePersistence savePersistence;
     private final NodeValidator nodeValidator;
     private final NodeMetadataExtractor metadataExtractor;
+    private final AuditProvider auditProvider;
 
     public <S> List<S> saveAll(List<S> entities) {
         nodeValidator.validateNodes(entities);
@@ -40,13 +44,65 @@ public class Neo4jSaveService {
         // Generate IDs for nodes with @GeneratedValue before saving
         Map<Object, Object> nodeIdMap = generateIdsForNodes(allNodesToSave, nodeMetadataMap);
 
+        // Populate audit fields for all nodes
+        Map<Object, Map<String, Object>> auditValuesMap = populateAuditFields(allNodesToSave, nodeMetadataMap);
+
         // Save all nodes in bulk
-        saveNodesInBulk(allNodesToSave, nodeMetadataMap);
+        saveNodesInBulk(allNodesToSave, nodeMetadataMap, auditValuesMap);
 
         // Create relationships
         createRelationships(entities, metadata, nodeIdMap);
 
         return entities;
+    }
+
+    private Map<Object, Map<String, Object>> populateAuditFields(
+            Map<Object, Object> allNodesToSave,
+            Map<Object, NodeMetadata> nodeMetadataMap
+    ) {
+        Map<Object, Map<String, Object>> auditValuesMap = new HashMap<>();
+        String currentUser = auditProvider.getCurrentUser();
+        LocalDateTime currentTimestamp = auditProvider.getCurrentTimestamp();
+
+        for (Object node : allNodesToSave.keySet()) {
+            NodeMetadata metadata = nodeMetadataMap.get(node);
+            if (metadata == null || !metadata.getAuditFields().hasAnyAuditFields()) {
+                continue;
+            }
+
+            AuditFieldMetadata auditFields = metadata.getAuditFields();
+            Map<String, Object> auditValues = new HashMap<>();
+
+            try {
+                // Set createdBy and createdDate (always for new nodes)
+                if (auditFields.hasCreatedBy()) {
+                    setFieldValue(auditFields.getCreatedByField(), node, currentUser);
+                    auditValues.put(auditFields.getCreatedByField().getName(), currentUser);
+                }
+
+                if (auditFields.hasCreatedDate()) {
+                    setFieldValue(auditFields.getCreatedDateField(), node, currentTimestamp);
+                    auditValues.put(auditFields.getCreatedDateField().getName(), currentTimestamp);
+                }
+
+                // Set lastModifiedBy and lastModifiedDate (for both new and updated nodes)
+                if (auditFields.hasLastModifiedBy()) {
+                    setFieldValue(auditFields.getLastModifiedByField(), node, currentUser);
+                    auditValues.put(auditFields.getLastModifiedByField().getName(), currentUser);
+                }
+
+                if (auditFields.hasLastModifiedDate()) {
+                    setFieldValue(auditFields.getLastModifiedDateField(), node, currentTimestamp);
+                    auditValues.put(auditFields.getLastModifiedDateField().getName(), currentTimestamp);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to set audit fields on node: " + node.getClass().getName(), e);
+            }
+
+            auditValuesMap.put(node, auditValues);
+        }
+
+        return auditValuesMap;
     }
 
     private Map<Object, Object> generateIdsForNodes(
@@ -240,7 +296,8 @@ public class Neo4jSaveService {
 
     private void saveNodesInBulk(
             Map<Object, Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
+            Map<Object, NodeMetadata> nodeMetadataMap,
+            Map<Object, Map<String, Object>> auditValuesMap
     ) {
         // Group nodes by type
         Map<Class<?>, List<Object>> nodesByType = allNodesToSave.values().stream()
@@ -252,7 +309,7 @@ public class Neo4jSaveService {
             List<Object> nodes = entry.getValue();
             NodeMetadata metadata = metadataExtractor.extractMetadata(nodeClass);
 
-            savePersistence.saveNodesBulk(nodes, metadata);
+            savePersistence.saveNodesBulk(nodes, metadata, auditValuesMap);
         }
     }
 

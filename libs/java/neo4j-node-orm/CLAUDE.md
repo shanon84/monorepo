@@ -197,9 +197,9 @@ public class MyService {
 
 ```yaml
 logging:
-  level:
-    com.example.neo4j.nodeorm: DEBUG
-    org.springframework.data.neo4j: DEBUG
+    level:
+        com.example.neo4j.nodeorm: DEBUG
+        org.springframework.data.neo4j: DEBUG
 ```
 
 ### Häufige Fehler

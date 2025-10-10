@@ -13,4 +13,5 @@ public class NodeMetadata {
     private FieldMetadata idField;
     private List<PropertyMetadata> properties = new ArrayList<>();
     private List<RelationshipMetadata> relationships = new ArrayList<>();
+    private AuditFieldMetadata auditFields = new AuditFieldMetadata();
 }

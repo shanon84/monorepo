@@ -17,9 +17,7 @@
       "options": {
         "task": "spring-boot:run"
       },
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "format-BE": {},
     "unittest-BE": {},

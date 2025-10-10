@@ -4,7 +4,9 @@
       "Bash(nx build-BE:*)",
       "Bash(nx unittest-BE:*)",
       "Bash(nx integrationtest-BE:*)",
-      "Bash(prettier:*)"
+      "Bash(prettier:*)",
+      "Bash(yarn format-BE:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []

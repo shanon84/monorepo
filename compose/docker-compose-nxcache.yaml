@@ -12,13 +12,27 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
+      test: ["CMD", "mc", "ready", "local"]
       interval: 5s
       timeout: 5s
       retries: 5
     hostname: minio
     volumes:
-      - d:\\dockerdata\\minio\\data:/data
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      mc mb myminio/remotecache --ignore-existing;
+      mc ilm add myminio/remotecache --expiry-days 7;
+      echo 'Bucket remotecache created with 7 days expiry policy';
+      exit 0;
+      "
 
   nx-cache-server:
     image: ghcr.io/ikatsuba/nx-cache-server:latest
@@ -32,4 +46,8 @@ services:
       S3_ENDPOINT_URL: http://minio:9000
       NX_CACHE_ACCESS_TOKEN: my-secret-token
     depends_on:
-      - minio
+      minio-init:
+        condition: service_completed_successfully
+
+volumes:
+  minio_data:

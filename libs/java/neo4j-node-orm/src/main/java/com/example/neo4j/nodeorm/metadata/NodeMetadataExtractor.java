@@ -1,5 +1,9 @@
 package com.example.neo4j.nodeorm.metadata;
 
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -36,6 +40,8 @@ public class NodeMetadataExtractor {
                 metadata.setIdField(extractIdField(field));
             } else if (field.isAnnotationPresent(Relationship.class)) {
                 metadata.getRelationships().add(extractRelationship(field));
+            } else if (isAuditField(field)) {
+                extractAuditField(field, metadata.getAuditFields());
             } else {
                 metadata.getProperties().add(extractProperty(field));
             }
@@ -48,6 +54,25 @@ public class NodeMetadataExtractor {
         }
 
         return metadata;
+    }
+
+    private boolean isAuditField(Field field) {
+        return field.isAnnotationPresent(CreatedBy.class)
+                || field.isAnnotationPresent(CreatedDate.class)
+                || field.isAnnotationPresent(LastModifiedBy.class)
+                || field.isAnnotationPresent(LastModifiedDate.class);
+    }
+
+    private void extractAuditField(Field field, AuditFieldMetadata auditFields) {
+        if (field.isAnnotationPresent(CreatedBy.class)) {
+            auditFields.setCreatedByField(field);
+        } else if (field.isAnnotationPresent(CreatedDate.class)) {
+            auditFields.setCreatedDateField(field);
+        } else if (field.isAnnotationPresent(LastModifiedBy.class)) {
+            auditFields.setLastModifiedByField(field);
+        } else if (field.isAnnotationPresent(LastModifiedDate.class)) {
+            auditFields.setLastModifiedDateField(field);
+        }
     }
 
     private String extractNodeName(Class<?> nodeClass) {
