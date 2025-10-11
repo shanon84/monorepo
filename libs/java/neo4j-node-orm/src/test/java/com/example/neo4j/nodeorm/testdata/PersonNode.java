@@ -10,6 +10,7 @@ import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +32,9 @@ public class PersonNode {
     private LocalDate birthDate;
 
     private Integer age;
+
+    @Relationship(type = "REPORTS_TO", direction = Relationship.Direction.OUTGOING)
+    private PersonNode manager;
 
     @Version
     private Integer version;

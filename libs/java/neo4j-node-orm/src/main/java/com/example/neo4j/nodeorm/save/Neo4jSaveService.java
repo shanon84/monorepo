@@ -59,10 +59,10 @@ public class Neo4jSaveService {
         // 6. Save all nodes in bulk
         saveNodesInBulk(allNodesToSave);
 
-        // 7. Create relationships
-        for (Object entity : entities) {
-            NodeMetadata metadata = metadataExtractor.extractMetadata(entity.getClass());
-            createRelationshipsForEntity(entity, metadata);
+        // 7. Create relationships for ALL collected nodes (not just top-level entities)
+        for (Object node : allNodesToSave) {
+            NodeMetadata metadata = metadataExtractor.extractMetadata(node.getClass());
+            createRelationshipsForEntity(node, metadata);
         }
 
         return entities;
