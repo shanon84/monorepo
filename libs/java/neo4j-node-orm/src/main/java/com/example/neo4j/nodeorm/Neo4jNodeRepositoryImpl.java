@@ -31,7 +31,7 @@ public class Neo4jNodeRepositoryImpl<T, ID> implements Neo4jNodeRepository<T, ID
     }
 
     @Override
-    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(Iterable<S> entities) {
         List<S> entityList = StreamSupport.stream(entities.spliterator(), false)
                 .collect(Collectors.toList());
         if (entityClass == null && !entityList.isEmpty()) {
@@ -53,13 +53,13 @@ public class Neo4jNodeRepositoryImpl<T, ID> implements Neo4jNodeRepository<T, ID
     }
 
     @Override
-    public Iterable<T> findAll() {
+    public List<T> findAll() {
         ensureEntityClassSet();
         return findService.findAll(entityClass);
     }
 
     @Override
-    public Iterable<T> findAllById(Iterable<ID> ids) {
+    public List<T> findAllById(Iterable<ID> ids) {
         ensureEntityClassSet();
         return findService.findAllById(ids, entityClass);
     }

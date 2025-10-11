@@ -28,6 +28,14 @@ com.example.neo4j.nodeorm/
 │   ├── PropertyMetadata         # Property-Metadaten
 │   ├── RelationshipMetadata     # Relationship-Metadaten
 │   └── NodeMetadataExtractor    # Extrahiert Metadaten aus annotierten Klassen
+├── query/
+│   ├── QueryMethodHandler       # Handler für @Query und Query Derivation
+│   ├── QueryMethodParser        # Parst Methodennamen zu Query-Strukturen
+│   ├── CypherQueryGenerator     # Generiert Cypher aus geparsten Queries
+│   ├── Neo4jNodeMapper          # Mapped Neo4j Nodes zu Entities
+│   ├── QueryMethod              # Datenklasse für geparste Query-Methode
+│   ├── QueryCriteria            # Datenklasse für einzelnes Kriterium
+│   └── QueryOperator            # Enum für Query-Operatoren
 └── validation/
     └── NodeValidator            # Validiert Node-Entities
 ```
@@ -51,6 +59,12 @@ com.example.neo4j.nodeorm/
     - `OUTGOING` und `INCOMING` Richtungen
     - Collections und Single-Value Relationships
     - Bulk-Erstellung via UNWIND
+
+4. **Custom Queries**: `QueryMethodHandler` unterstützt zwei Arten von Queries:
+    - **@Query Annotation**: Custom Cypher-Queries direkt in Repository-Methoden
+    - **Query Derivation**: Automatische Query-Generierung aus Methodennamen (z.B. `findAllByLastName`)
+    - Parameter-Binding über `@Param` Annotation oder Parameternamen
+    - Unterstützt verschiedene Return-Types: List, Single Entity, Long (count), Boolean (exists)
 
 ## Code-Stil & Konventionen
 
@@ -164,7 +178,42 @@ Für jede Node-Klasse sollte ein typisiertes Repository-Interface erstellt werde
 
 ```java
 public interface PersonNodeRepository extends Neo4jNodeRepository<PersonNode> {
+    // Query Derivation - Cypher wird automatisch generiert
+    List<PersonNode> findAllByLastName(String lastName);
+
+    // @Query Annotation - Custom Cypher Query
+    @Query("""
+            MATCH (n:Person) WHERE
+            n.age > $age
+            RETURN n
+            """)
+    List<PersonNode> findAllByAgeGreateThan(Integer age);
 }
+```
+
+**Unterstützte Query-Patterns**:
+
+- **findBy/findAllBy**: Sucht Entities nach Kriterien
+    - Beispiel: `findAllByLastName(String lastName)` → `MATCH (n:Person) WHERE n.lastName = $lastName RETURN n`
+- **countBy**: Zählt Entities nach Kriterien
+    - Beispiel: `countByAge(Integer age)` → `MATCH (n:Person) WHERE n.age = $age RETURN count(n) AS count`
+- **existsBy**: Prüft Existenz von Entities
+    - Beispiel: `existsByEmail(String email)` → `MATCH (n:Person) WHERE n.email = $email RETURN count(n) > 0 AS exists`
+- **deleteBy/deleteAllBy**: Löscht Entities nach Kriterien
+    - Beispiel: `deleteAllByLastName(String lastName)` → `MATCH (n:Person) WHERE n.lastName = $lastName DETACH DELETE n`
+
+**Query Derivation - AND-Verknüpfung**:
+
+```java
+// Automatisch generiert: MATCH (n:Person) WHERE n.firstName = $firstName AND n.lastName = $lastName RETURN n
+List<PersonNode> findAllByFirstNameAndLastName(String firstName, String lastName);
+```
+
+**@Query Annotation - Custom Cypher**:
+
+```java
+@Query("MATCH (n:Person)-[:WORKS_FOR]->(c:Company) WHERE c.name = $companyName RETURN n")
+List<PersonNode> findAllEmployeesOfCompany(@Param("companyName") String companyName);
 ```
 
 **Bean-Konfiguration für typisierte Repositories**:
@@ -177,14 +226,18 @@ public class TestRepositoryConfiguration {
     private final Neo4jSaveService saveService;
     private final Neo4jFindService findService;
     private final Neo4jDeleteService deleteService;
+    private final QueryMethodHandler queryMethodHandler;  // WICHTIG: Für Custom Queries
 
     @Bean
     public PersonNodeRepository personNodeRepository() {
-        return createTypedRepository(PersonNodeRepository.class);
+        return createTypedRepository(PersonNodeRepository.class, PersonNode.class);
     }
 
     @SuppressWarnings("unchecked")
-    private <T, R extends Neo4jNodeRepository<T>> R createTypedRepository(Class<R> repositoryInterface) {
+    private <T, R extends Neo4jNodeRepository<T>> R createTypedRepository(
+            Class<R> repositoryInterface,
+            Class<T> entityClass
+    ) {
         Neo4jNodeRepositoryImpl<T> impl = new Neo4jNodeRepositoryImpl<>(saveService, findService, deleteService);
 
         return (R) Proxy.newProxyInstance(
@@ -192,6 +245,11 @@ public class TestRepositoryConfiguration {
                 new Class<?>[]{repositoryInterface},
                 (proxy, method, args) -> {
                     try {
+                        // Check if method can be handled by QueryMethodHandler
+                        if (queryMethodHandler.canHandle(method)) {
+                            return queryMethodHandler.executeQuery(method, args, entityClass);
+                        }
+                        // Otherwise, delegate to standard implementation
                         return method.invoke(impl, args);
                     } catch (Exception e) {
                         throw e.getCause() != null ? e.getCause() : e;
@@ -237,6 +295,37 @@ class MyIntegrationTest {
 
         assertThat(saved.getId()).isNotNull();
     }
+
+    @Test
+    void shouldFindPersonsByLastName() {
+        // Given - Create test data
+        personNodeRepository.saveAll(List.of(
+                new PersonNode().setFirstName("John").setLastName("Doe"),
+                new PersonNode().setFirstName("Jane").setLastName("Doe")
+        ));
+
+        // When - Query Derivation
+        List<PersonNode> doesPersons = personNodeRepository.findAllByLastName("Doe");
+
+        // Then
+        assertThat(doesPersons).hasSize(2);
+    }
+
+    @Test
+    void shouldFindPersonsByCustomQuery() {
+        // Given - Create test data
+        personNodeRepository.saveAll(List.of(
+                new PersonNode().setFirstName("John").setAge(30),
+                new PersonNode().setFirstName("Jane").setAge(25)
+        ));
+
+        // When - @Query Annotation
+        List<PersonNode> olderPersons = personNodeRepository.findAllByAgeGreateThan(28);
+
+        // Then
+        assertThat(olderPersons).hasSize(1);
+        assertThat(olderPersons.get(0).getFirstName()).isEqualTo("John");
+    }
 }
 ```
 
@@ -249,10 +338,14 @@ class MyIntegrationTest {
 
 ## Bekannte Einschränkungen
 
-- **Nur Save-Operation**: Derzeit nur `saveAll()` implementiert
-- **Keine Update-Logic**: Existing Nodes werden nicht geupdatet
+- **Keine Update-Logic**: Existing Nodes werden nicht geupdatet (nur Save/Insert)
 - **Keine Cascade-Delete**: Relationships werden nicht automatisch gelöscht
 - **ID-Format**: Nur `Long` als ID-Typ unterstützt
+- **Query Derivation**: Derzeit nur einfache Operatoren (EQUALS) unterstützt
+    - Keine Unterstützung für: GreaterThan, LessThan, Like, Contains, etc. (außer via @Query)
+    - Keine OR-Verknüpfung (nur AND)
+    - Keine Sorting/Ordering (z.B. `OrderBy`)
+    - Keine Paging (z.B. `Pageable` Parameter)
 
 ## Migration & Versioning
 
@@ -276,6 +369,14 @@ logging:
 1. **IllegalAccessException**: Field nicht accessible → Lombok/Reflection-Problem
 2. **NullPointerException bei ID**: ID-Field nicht gefunden → `@Id` vergessen
 3. **Relationship nicht erstellt**: Direction falsch oder Target-Node nicht gespeichert
+4. **Query Derivation funktioniert nicht**:
+    - Methodenname folgt nicht dem Pattern (muss mit `findBy`, `findAllBy`, etc. beginnen)
+    - Property-Name stimmt nicht mit Entity-Field überein (Case-Sensitive!)
+    - `QueryMethodHandler` nicht in `TestRepositoryConfiguration` integriert
+5. **@Query gibt leere Ergebnisse**:
+    - Label in Cypher stimmt nicht mit `@Node` Annotation überein (z.B. `Person` vs. `PersonNode`)
+    - Parameter-Name in Cypher stimmt nicht mit Methodenparameter überein
+    - Node-Variable muss `n` heißen (z.B. `RETURN n`, nicht `RETURN p`)
 
 ## Best Practices
 
@@ -284,6 +385,12 @@ logging:
 3. **Null-Checks**: Relationships können null sein
 4. **ID-Management**: IDs nie manuell setzen, immer von Neo4j generieren lassen
 5. **Testing**: Integration Tests mit Docker Compose Neo4j-Instanz
+6. **Query-Wahl**:
+    - Einfache Queries: **Query Derivation** bevorzugen (z.B. `findAllByLastName`)
+    - Komplexe Queries: **@Query Annotation** mit Custom Cypher verwenden
+    - Joins/Relationships: Immer **@Query** verwenden (Query Derivation unterstützt keine Relationship-Traversierung)
+7. **Node-Labels**: Konsistent zwischen `@Node` und `@Query` Cypher verwenden
+8. **Parameter-Binding**: `@Param` Annotation für bessere Lesbarkeit verwenden
 
 ## Hinweise für Claude
 
