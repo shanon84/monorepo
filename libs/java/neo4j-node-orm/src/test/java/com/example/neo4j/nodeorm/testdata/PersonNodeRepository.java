@@ -107,4 +107,20 @@ public interface PersonNodeRepository extends Neo4jNodeRepository<PersonNode, St
     List<PersonNode> findByLastNameOrderByFirstNameAsc(String lastName);
 
     List<PersonNode> findByAgeGreaterThanOrderByAgeAscFirstNameDesc(Integer age);
+
+    // ========== Pagination (Top/First Keywords) ==========
+
+    // Top keyword
+    List<PersonNode> findTop3ByOrderByAgeDesc();
+
+    List<PersonNode> findTop5ByActiveTrueOrderByAgeAsc();
+
+    List<PersonNode> findTop2ByLastNameOrderByFirstNameAsc(String lastName);
+
+    // First keyword
+    List<PersonNode> findFirst1ByOrderByAgeAsc();
+
+    List<PersonNode> findFirstByOrderByLastNameAsc();
+
+    List<PersonNode> findFirst10ByAgeGreaterThanOrderByAgeDesc(Integer age);
 }

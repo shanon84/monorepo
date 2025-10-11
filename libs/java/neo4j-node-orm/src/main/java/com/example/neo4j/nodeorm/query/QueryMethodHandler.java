@@ -52,6 +52,8 @@ public class QueryMethodHandler {
         // Handle custom query derivation methods
         return methodName.startsWith("findBy")
                 || methodName.startsWith("findAllBy")
+                || methodName.startsWith("findTop")
+                || methodName.startsWith("findFirst")
                 || methodName.startsWith("countBy")
                 || methodName.startsWith("existsBy")
                 || methodName.startsWith("deleteBy")

@@ -123,9 +123,17 @@ List<PersonNode> findByLastName(String lastName, Sort sort);
 List<PersonNode> findAll(Sort.by(Direction.DESC, "age", "lastName"));
 ```
 
-### 3. **Pagination**
+### 3. **Pagination** ✅ TEILWEISE IMPLEMENTIERT
 
-#### **Pageable Support**
+#### **Top/First Keywords** ✅ IMPLEMENTIERT
+- ✅ `Top` Keyword - `findTop10ByLastName(String lastName)`
+- ✅ `First` Keyword - `findFirst3ByOrderByAgeDesc()`
+- ✅ `Top`/`First` mit Nummer - `findTop5ByActiveTrueOrderByAgeAsc()`
+- ✅ `Top`/`First` ohne Nummer (default: 1) - `findFirstByOrderByLastNameAsc()`
+- ✅ Kombinierbar mit allen Query Derivation Operatoren
+- ✅ Kombinierbar mit OrderBy (Sorting)
+
+#### **Pageable Support** ❌ NOCH NICHT IMPLEMENTIERT
 - ❌ `Pageable` Parameter - `findAll(Pageable pageable)`
 - ❌ `Page<T>` Return Type - Mit Total Count
 - ❌ `Slice<T>` Return Type - Ohne Total Count
@@ -134,16 +142,18 @@ List<PersonNode> findAll(Sort.by(Direction.DESC, "age", "lastName"));
 
 #### **Limit & Offset**
 - ❌ `Limit` Parameter - `findAll(Limit limit)`
-- ❌ `Top` / `First` Keywords - `findTop10ByLastName(String lastName)`
-- ❌ `First` mit Nummer - `findFirst3ByOrderByAgeDesc()`
 
 **Beispiele:**
 ```java
-// Fehlt aktuell:
-Page<PersonNode> findByLastName(String lastName, Pageable pageable);
-Slice<PersonNode> findByAge(Integer age, Pageable pageable);
+// ✅ Implementiert (Top/First Keywords):
 List<PersonNode> findTop10ByOrderByAgeDesc();
 List<PersonNode> findFirst5ByLastName(String lastName);
+List<PersonNode> findTop3ByActiveTrueOrderByAgeAsc();
+List<PersonNode> findFirstByOrderByLastNameAsc(); // Default limit = 1
+
+// ❌ Fehlt noch (Pageable Support):
+Page<PersonNode> findByLastName(String lastName, Pageable pageable);
+Slice<PersonNode> findByAge(Integer age, Pageable pageable);
 ```
 
 ### 4. **Projections**
@@ -350,8 +360,10 @@ void deactivateByLastName(@Param("lastName") String lastName);
 - ✅ Collection-Operatoren (In, NotIn)
 - ✅ Logische Operatoren (AND, OR, NOT)
 - ✅ Sorting via OrderBy in Method Names (Asc/Desc, multiple fields)
+- ✅ Pagination via Top/First Keywords (findTop10By, findFirst5By, etc.)
 - ❌ Case Insensitive (IgnoreCase, AllIgnoreCase)
 - ❌ Dynamic Sorting (Sort parameter)
+- ❌ Pageable parameter support
 
 ### 2. **Return Types**
 - ✅ `List<T>` Support
@@ -382,10 +394,10 @@ void deactivateByLastName(@Param("lastName") String lastName);
    - ✅ ~~`OrderBy` in Method Names~~
    - ❌ `Sort` Parameter Support (später)
 
-3. **Pagination** ⬅️ NÄCHSTER SCHRITT
-   - `Pageable` Parameter
-   - `Page<T>` / `Slice<T>` Return Types
-   - `Top` / `First` Keywords
+3. **Pagination** ✅ TEILWEISE IMPLEMENTIERT
+   - ✅ ~~`Top` / `First` Keywords~~
+   - ❌ `Pageable` Parameter (später)
+   - ❌ `Page<T>` / `Slice<T>` Return Types (später)
 
 4. **Return Types**
    - `Optional<T>` Support
@@ -449,10 +461,11 @@ void deactivateByLastName(@Param("lastName") String lastName);
    - ✅ ~~Füge OR-Unterstützung hinzu~~
    - ❌ Implementiere IgnoreCase (später)
 
-2. **Phase 2 - Sorting & Pagination** ✅ SORTING ABGESCHLOSSEN
+2. **Phase 2 - Sorting & Pagination** ✅ ABGESCHLOSSEN (OHNE PAGEABLE)
    - ✅ ~~`OrderBy` in Method Names~~
+   - ✅ ~~`Top`/`First` Keywords~~
    - ❌ `Sort` Parameter Support (später)
-   - ⏳ **AKTUELL**: Pagination (`Pageable`, `Page<T>`, `Top`/`First`)
+   - ❌ `Pageable`, `Page<T>`, `Slice<T>` Support (später)
 
 3. **Phase 3 - Projections**
    - Interface-Based Projections (Closed)
@@ -482,10 +495,11 @@ void deactivateByLastName(@Param("lastName") String lastName);
 - ✅ Erweiterte Query Derivation Operatoren (GreaterThan, LessThan, Between, Like, Containing, etc.)
 - ✅ OR-Verknüpfung in Query Methods
 - ✅ Boolean, Null-Checks, Collection-Operatoren
-- ✅ **NEU**: Sorting via OrderBy in Method Names (Asc/Desc, multiple fields)
+- ✅ Sorting via OrderBy in Method Names (Asc/Desc, multiple fields)
+- ✅ **NEU**: Pagination via Top/First Keywords (findTop10By, findFirst5By, etc.)
 
 **Hauptlücken:**
-- ❌ Pagination (Top/First keywords, Pageable parameter)
+- ❌ Pageable parameter (findAll(Pageable pageable), Page<T>, Slice<T>)
 - ❌ Dynamic Sorting (Sort parameter)
 - ❌ Projections
 - ❌ Async/Stream Support
@@ -493,4 +507,4 @@ void deactivateByLastName(@Param("lastName") String lastName);
 - ❌ Case Insensitive Operatoren
 
 **Nächster Fokus:**
-Pagination (Top/First keywords in method names, später Pageable parameter mit Page<T>/Slice<T>).
+Projections (Interface-based, DTO-based, Dynamic Projections).

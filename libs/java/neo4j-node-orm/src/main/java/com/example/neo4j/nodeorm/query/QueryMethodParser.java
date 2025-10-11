@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class QueryMethodParser {
 
     private static final Pattern METHOD_PATTERN = Pattern.compile(
-            "(find|findAll|count|exists|delete|deleteAll)By(.+)"
+            "(find|findAll|findTop|findFirst|count|exists|delete|deleteAll)(\\d+)?By(.+)"
     );
 
     /**
@@ -27,12 +27,27 @@ public class QueryMethodParser {
             throw new IllegalArgumentException("Cannot parse method name: " + methodName);
         }
 
-        String operation = matcher.group(1); // find, findAll, count, etc.
-        String criteriaAndSort = matcher.group(2);  // FirstName, LastNameAndAge, etc.
+        String operation = matcher.group(1); // find, findAll, findTop, findFirst, count, etc.
+        String limitStr = matcher.group(2);  // Optional number for Top/First (e.g., "10", "5")
+        String criteriaAndSort = matcher.group(3);  // FirstName, LastNameAndAge, etc.
 
         QueryMethod queryMethod = new QueryMethod();
         queryMethod.setMethodName(methodName);
-        queryMethod.setOperation(operation);
+
+        // Normalize operation (findTop -> find, findFirst -> find)
+        String normalizedOperation = operation;
+        if (operation.equals("findTop") || operation.equals("findFirst")) {
+            normalizedOperation = "find";
+            // Parse limit
+            if (limitStr != null && !limitStr.isEmpty()) {
+                queryMethod.setLimit(Integer.parseInt(limitStr));
+            } else {
+                // findTop/findFirst without number defaults to 1
+                queryMethod.setLimit(1);
+            }
+        }
+
+        queryMethod.setOperation(normalizedOperation);
         queryMethod.setEntityClass(metadata.getNodeClass());
         queryMethod.setReturnType(method.getReturnType());
 

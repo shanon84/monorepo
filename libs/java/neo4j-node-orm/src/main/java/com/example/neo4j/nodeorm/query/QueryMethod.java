@@ -13,4 +13,5 @@ public class QueryMethod {
     private Class<?> returnType;
     private List<QueryCriteria> criteria;
     private List<SortOrder> sortOrders = new ArrayList<>(); // For OrderBy in method name
+    private Integer limit; // For Top/First keywords (e.g., findTop10By, findFirst5By)
 }

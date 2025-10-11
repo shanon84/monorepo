@@ -6,7 +6,8 @@
       "Bash(nx integrationtest-BE:*)",
       "Bash(yarn format-BE:*)",
       "Bash(podman compose:*)",
-      "Bash(nx format-BE:*)"
+      "Bash(nx format-BE:*)",
+      "Bash(git commit -m *)"
     ],
     "deny": [],
     "ask": []

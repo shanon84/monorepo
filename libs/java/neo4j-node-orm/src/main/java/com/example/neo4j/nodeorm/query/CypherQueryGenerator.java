@@ -43,6 +43,11 @@ public class CypherQueryGenerator {
             cypher.append(" ORDER BY ").append(orderByClause);
         }
 
+        // Add LIMIT clause
+        if (queryMethod.getLimit() != null) {
+            cypher.append(" LIMIT ").append(queryMethod.getLimit());
+        }
+
         return cypher.toString();
     }
 
