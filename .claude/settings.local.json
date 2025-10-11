@@ -4,9 +4,9 @@
       "Bash(nx build-BE:*)",
       "Bash(nx unittest-BE:*)",
       "Bash(nx integrationtest-BE:*)",
-      "Bash(prettier:*)",
       "Bash(yarn format-BE:*)",
-      "Bash(podman compose:*)"
+      "Bash(podman compose:*)",
+      "Bash(nx format-BE:*)"
     ],
     "deny": [],
     "ask": []

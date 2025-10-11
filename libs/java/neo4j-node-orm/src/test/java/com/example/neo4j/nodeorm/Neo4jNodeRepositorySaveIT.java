@@ -418,4 +418,142 @@ class Neo4jNodeRepositorySaveIT {
             assertThat(personInDb.getAge()).isEqualTo(30 + i);
         }
     }
+
+    @Test
+    void shouldSetVersionToZeroOnCreate() {
+        // Given
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setAge(30);
+
+        // Verify version is not set initially
+        assertThat(person.getVersion()).isNull();
+
+        // When
+        PersonNode savedPerson = personNodeRepository.save(person);
+
+        // Then - Version should be set to 0
+        assertThat(savedPerson.getVersion()).isEqualTo(0);
+
+        // Verify in DB
+        PersonNode personInDb = personNodeRepository.findById(savedPerson.getId()).orElseThrow();
+        assertThat(personInDb.getVersion()).isEqualTo(0);
+    }
+
+    @Test
+    void shouldIncrementVersionOnUpdate() {
+        // Given - Create a person first
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setAge(30);
+
+        PersonNode savedPerson = personNodeRepository.save(person);
+        assertThat(savedPerson.getVersion()).isEqualTo(0);
+
+        // When - Update the person
+        savedPerson.setAge(31);
+        PersonNode updatedPerson = personNodeRepository.save(savedPerson);
+
+        // Then - Version should be incremented to 1
+        assertThat(updatedPerson.getVersion()).isEqualTo(0); // Object still has old version
+
+        // Verify in DB - version was incremented
+        PersonNode personInDb = personNodeRepository.findById(savedPerson.getId()).orElseThrow();
+        assertThat(personInDb.getVersion()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldThrowOptimisticLockingExceptionWhenVersionMismatch() {
+        // Given - Create a person
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setAge(30);
+
+        PersonNode savedPerson = personNodeRepository.save(person);
+        String personId = savedPerson.getId();
+        assertThat(savedPerson.getVersion()).isEqualTo(0);
+
+        // Simulate concurrent update by modifying in DB directly
+        neo4jClient.query("MATCH (p:Person) WHERE p.id = $id SET p.age = 40, p.version = 1")
+                .bind(personId).to("id")
+                .run();
+
+        // When - Try to update with stale version (still 0)
+        savedPerson.setAge(35);
+
+        // Then - Should throw OptimisticLockingFailureException
+        org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.dao.OptimisticLockingFailureException.class,
+                () -> personNodeRepository.save(savedPerson)
+        );
+    }
+
+    @Test
+    void shouldAllowUpdateWithCorrectVersion() {
+        // Given - Create a person and update once
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setAge(30);
+
+        PersonNode savedPerson = personNodeRepository.save(person);
+        String personId = savedPerson.getId();
+
+        // First update
+        savedPerson.setAge(31);
+        personNodeRepository.save(savedPerson);
+
+        // Reload from DB to get current version
+        PersonNode reloadedPerson = personNodeRepository.findById(personId).orElseThrow();
+        assertThat(reloadedPerson.getVersion()).isEqualTo(1);
+
+        // When - Update with correct version
+        reloadedPerson.setAge(32);
+        personNodeRepository.save(reloadedPerson);
+
+        // Then - Should succeed
+        PersonNode finalPerson = personNodeRepository.findById(personId).orElseThrow();
+        assertThat(finalPerson.getAge()).isEqualTo(32);
+        assertThat(finalPerson.getVersion()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldHandleBulkUpdateWithVersionCheck() {
+        // Given - Create multiple persons
+        List<PersonNode> persons = new java.util.ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            PersonNode person = new PersonNode()
+                    .setFirstName("Person" + i)
+                    .setLastName("Test")
+                    .setAge(20 + i);
+            persons.add(person);
+        }
+
+        List<PersonNode> savedPersons = StreamSupport.stream(
+                personNodeRepository.saveAll(persons).spliterator(), false
+        ).toList();
+
+        // Verify all have version 0
+        assertThat(savedPersons).allMatch(p -> p.getVersion() == 0);
+
+        // Simulate concurrent update on one person
+        String person2Id = savedPersons.get(2).getId();
+        neo4jClient.query("MATCH (p:Person) WHERE p.id = $id SET p.version = 5")
+                .bind(person2Id).to("id")
+                .run();
+
+        // When - Try to update all persons with stale versions
+        for (PersonNode p : savedPersons) {
+            p.setAge(p.getAge() + 10);
+        }
+
+        // Then - Should throw OptimisticLockingFailureException for person2
+        org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.dao.OptimisticLockingFailureException.class,
+                () -> personNodeRepository.saveAll(savedPersons)
+        );
+    }
 }

@@ -33,7 +33,7 @@ public class Neo4jSaveService {
             collectNodesToSave(entity, allNodesToSave);
         }
 
-        // Process each node: validate, generate ID, set audit fields
+        // Process each node: validate, generate ID, set audit fields, set version
         for (Object node : allNodesToSave) {
             // 1. Validate
             nodeValidator.validateNodeAnnotation(node.getClass());
@@ -49,6 +49,11 @@ public class Neo4jSaveService {
 
             // 5. Set audit fields directly on entity
             auditFieldPopulatorService.populateAuditFieldsOnNode(node, metadata, isCreate);
+
+            // 6. Set version to 0 for new nodes
+            if (isCreate && metadata.getVersionField() != null) {
+                reflectionService.setFieldValue(metadata.getVersionField().getField(), node, 0);
+            }
         }
 
         // 6. Save all nodes in bulk
@@ -202,8 +207,36 @@ public class Neo4jSaveService {
                 savePersistence.createNodesBulk(nodesToCreate, metadata);
             }
 
-            // Execute bulk UPDATE
+            // Execute bulk UPDATE with version handling
             if (!nodesToUpdate.isEmpty()) {
+                // If node has version field, load current versions from DB for nodes that have null version
+                if (metadata.getVersionField() != null) {
+                    List<Object> idsToLoadVersions = new java.util.ArrayList<>();
+                    for (Object node : nodesToUpdate) {
+                        Object version = reflectionService.getFieldValue(metadata.getVersionField().getField(), node);
+                        if (version == null) {
+                            Object nodeId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
+                            idsToLoadVersions.add(nodeId);
+                        }
+                    }
+
+                    // Load versions from DB
+                    if (!idsToLoadVersions.isEmpty()) {
+                        Map<Object, Object> versionsMap = savePersistence.getVersionsByIds(idsToLoadVersions, metadata);
+
+                        // Set loaded versions on nodes
+                        for (Object node : nodesToUpdate) {
+                            Object nodeId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
+                            Object version = reflectionService.getFieldValue(metadata.getVersionField().getField(), node);
+
+                            if (version == null && versionsMap.containsKey(nodeId)) {
+                                Object loadedVersion = versionsMap.get(nodeId);
+                                reflectionService.setFieldValue(metadata.getVersionField().getField(), node, loadedVersion);
+                            }
+                        }
+                    }
+                }
+
                 savePersistence.updateNodesBulk(nodesToUpdate, metadata);
             }
         }

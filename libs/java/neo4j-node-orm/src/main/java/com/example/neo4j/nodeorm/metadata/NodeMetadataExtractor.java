@@ -4,6 +4,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -38,6 +39,10 @@ public class NodeMetadataExtractor {
 
             if (field.isAnnotationPresent(Id.class)) {
                 metadata.setIdField(extractIdField(field));
+            } else if (field.isAnnotationPresent(Version.class)) {
+                metadata.setVersionField(extractVersionField(field));
+                // Also add version field as property so it is persisted
+                metadata.getProperties().add(extractProperty(field));
             } else if (field.isAnnotationPresent(Relationship.class)) {
                 metadata.getRelationships().add(extractRelationship(field));
             } else if (isAuditField(field)) {
@@ -99,6 +104,14 @@ public class NodeMetadataExtractor {
         metadata.setFieldName(field.getName());
         metadata.setFieldType(field.getType());
         metadata.setGenerated(field.isAnnotationPresent(GeneratedValue.class));
+        return metadata;
+    }
+
+    private FieldMetadata extractVersionField(Field field) {
+        FieldMetadata metadata = new FieldMetadata();
+        metadata.setField(field);
+        metadata.setFieldName(field.getName());
+        metadata.setFieldType(field.getType());
         return metadata;
     }
 

@@ -17,10 +17,47 @@ public class ReflectionService {
 
     public void setFieldValue(Field field, Object object, Object value) {
         try {
-            field.set(object, value);
+            // Convert value to field type if needed
+            Object convertedValue = convertToFieldType(value, field.getType());
+            field.set(object, convertedValue);
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Failed to set field: " + field.getName(), e);
         }
+    }
+
+    /**
+     * Convert a value to the target field type if possible.
+     * Handles common conversions like Long to Integer, etc.
+     */
+    private Object convertToFieldType(Object value, Class<?> targetType) {
+        if (value == null) {
+            return null;
+        }
+
+        // If types match, return as-is
+        if (targetType.isInstance(value)) {
+            return value;
+        }
+
+        // Handle numeric conversions
+        if (value instanceof Number number) {
+            if (targetType == Integer.class || targetType == int.class) {
+                return number.intValue();
+            } else if (targetType == Long.class || targetType == long.class) {
+                return number.longValue();
+            } else if (targetType == Double.class || targetType == double.class) {
+                return number.doubleValue();
+            } else if (targetType == Float.class || targetType == float.class) {
+                return number.floatValue();
+            } else if (targetType == Short.class || targetType == short.class) {
+                return number.shortValue();
+            } else if (targetType == Byte.class || targetType == byte.class) {
+                return number.byteValue();
+            }
+        }
+
+        // Return as-is and let Field.set handle it
+        return value;
     }
 
     public Object convertIdToFieldType(Object generatedId, Class<?> fieldType) {

@@ -65,6 +65,45 @@ public class Neo4jSavePersistence {
         return existsMap;
     }
 
+    /**
+     * Bulk check versions for nodes by their IDs.
+     * Returns a Map with ID as key and current version in DB as value.
+     * Only loads the version field, not the entire node.
+     */
+    public Map<Object, Object> getVersionsByIds(List<Object> ids, NodeMetadata metadata) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        // Version field is optional - if not present, return empty map
+        if (metadata.getVersionField() == null) {
+            return Map.of();
+        }
+
+        String nodeName = metadata.getNodeName();
+        String idPropertyName = metadata.getIdField().getFieldName();
+        String versionPropertyName = metadata.getVersionField().getFieldName();
+
+        // Use UNWIND to load only the version field for all IDs in one query
+        String cypher = "UNWIND $ids AS id " +
+                "MATCH (n:" + nodeName + ") WHERE n." + idPropertyName + " = id " +
+                "RETURN id, n." + versionPropertyName + " AS version";
+
+        List<Map<String, Object>> results = new ArrayList<>(neo4jClient.query(cypher)
+                .bind(ids).to("ids")
+                .fetch()
+                .all());
+
+        Map<Object, Object> versionsMap = new HashMap<>();
+        for (Map<String, Object> result : results) {
+            Object id = result.get("id");
+            Object version = result.get("version");
+            versionsMap.put(id, version);
+        }
+
+        return versionsMap;
+    }
+
     public void updateNodesBulk(
             List<Object> nodes,
             NodeMetadata metadata
@@ -72,10 +111,23 @@ public class Neo4jSavePersistence {
         String nodeName = metadata.getNodeName();
         String idPropertyName = metadata.getIdField().getFieldName();
 
-        // Build UNWIND query for bulk UPDATE (only modified fields)
+        // Check if node has version field
+        boolean hasVersion = metadata.getVersionField() != null;
+        String versionPropertyName = hasVersion ? metadata.getVersionField().getFieldName() : null;
+
+        // Build UNWIND query for bulk UPDATE
         StringBuilder cypher = new StringBuilder("UNWIND $nodes AS node\n");
-        cypher.append("MATCH (n:").append(nodeName).append(") WHERE n.").append(idPropertyName).append(" = node.id\n");
-        cypher.append("SET n += node.properties");
+        cypher.append("MATCH (n:").append(nodeName).append(") WHERE n.").append(idPropertyName).append(" = node.id");
+
+        if (hasVersion) {
+            // With versioning: Check version matches in WHERE clause
+            cypher.append(" AND n.").append(versionPropertyName).append(" = node.version\n");
+            cypher.append("SET n += node.properties, n.").append(versionPropertyName).append(" = n.").append(versionPropertyName).append(" + 1\n");
+            cypher.append("RETURN node.id AS id, node.version AS expectedVersion");
+        } else {
+            // Without versioning: Simple update
+            cypher.append("\nSET n += node.properties");
+        }
 
         // Prepare node data
         List<Map<String, Object>> nodeData = new ArrayList<>();
@@ -85,6 +137,10 @@ public class Neo4jSavePersistence {
             Map<String, Object> nodeEntry = new HashMap<>();
             try {
                 nodeEntry.put("id", metadata.getIdField().getField().get(node));
+                if (hasVersion) {
+                    Object version = metadata.getVersionField().getField().get(node);
+                    nodeEntry.put("version", version);
+                }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Failed to access ID field on node", e);
             }
@@ -94,9 +150,41 @@ public class Neo4jSavePersistence {
         }
 
         // Execute bulk update
-        neo4jClient.query(cypher.toString())
-                .bind(nodeData).to("nodes")
-                .run();
+        if (hasVersion) {
+            // With versioning: Check results to detect optimistic locking failures
+            List<Map<String, Object>> results = new ArrayList<>(neo4jClient.query(cypher.toString())
+                    .bind(nodeData).to("nodes")
+                    .fetch()
+                    .all());
+
+            // If fewer results than expected, some updates failed due to version mismatch
+            if (results.size() < nodes.size()) {
+                // Find which node(s) failed
+                java.util.Set<Object> successfulIds = results.stream()
+                        .map(r -> r.get("id"))
+                        .collect(java.util.stream.Collectors.toSet());
+
+                for (Object node : nodes) {
+                    try {
+                        Object nodeId = metadata.getIdField().getField().get(node);
+                        if (!successfulIds.contains(nodeId)) {
+                            Object expectedVersion = metadata.getVersionField().getField().get(node);
+                            throw new org.springframework.dao.OptimisticLockingFailureException(
+                                    String.format("Optimistic locking failed for node with ID '%s'. Expected version: %s",
+                                            nodeId, expectedVersion)
+                            );
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException("Failed to access field on node", e);
+                    }
+                }
+            }
+        } else {
+            // Without versioning: Simple update
+            neo4jClient.query(cypher.toString())
+                    .bind(nodeData).to("nodes")
+                    .run();
+        }
     }
 
     public void createNodesBulk(
