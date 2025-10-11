@@ -2,6 +2,7 @@ package com.example.neo4j.nodeorm.query;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -11,4 +12,5 @@ public class QueryMethod {
     private Class<?> entityClass;
     private Class<?> returnType;
     private List<QueryCriteria> criteria;
+    private List<SortOrder> sortOrders = new ArrayList<>(); // For OrderBy in method name
 }

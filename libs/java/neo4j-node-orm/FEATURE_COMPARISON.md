@@ -95,13 +95,16 @@ Dieser Dokument vergleicht die Fähigkeiten von Standard Spring Data Implementie
 - ❌ `IgnoreCase` - `findByNameIgnoreCase(String name)`
 - ❌ `AllIgnoreCase` - `findByFirstNameAndLastNameAllIgnoreCase(...)`
 
-### 2. **Sorting & Ordering**
+### 2. **Sorting & Ordering** ✅ TEILWEISE IMPLEMENTIERT
 
-#### **Method Name Sorting**
-- ❌ `OrderBy` - `findByLastNameOrderByFirstNameAsc(String lastName)`
-- ❌ `OrderBy` mit Multiple Fields - `findAllByOrderByLastNameAscFirstNameDesc()`
+#### **Method Name Sorting** ✅ IMPLEMENTIERT
+- ✅ `OrderBy` - `findByLastNameOrderByFirstNameAsc(String lastName)`
+- ✅ `OrderBy` mit Multiple Fields - `findAllByOrderByLastNameAscFirstNameDesc()`
+- ✅ `OrderBy` mit Single Field - `findAllByOrderByAgeAsc()`
+- ✅ `Asc` / `Desc` Suffixe unterstützt
+- ✅ Kombinierbar mit allen Query Derivation Operatoren
 
-#### **Dynamic Sorting**
+#### **Dynamic Sorting** ❌ NOCH NICHT IMPLEMENTIERT
 - ❌ `Sort` Parameter - `findAll(Sort sort)`
 - ❌ `Sort` mit Query Methods - `findByLastName(String lastName, Sort sort)`
 - ❌ `Sort.by(Direction, String...)` Support
@@ -109,9 +112,14 @@ Dieser Dokument vergleicht die Fähigkeiten von Standard Spring Data Implementie
 
 **Beispiele:**
 ```java
-// Fehlt aktuell:
+// ✅ Implementiert:
+List<PersonNode> findAllByOrderByAgeAsc();
+List<PersonNode> findByLastNameOrderByFirstNameAsc(String lastName);
+List<PersonNode> findAllByOrderByAgeDescFirstNameAsc();
+List<PersonNode> findByActiveTrueOrderByAgeDesc();
+
+// ❌ Fehlt noch (Dynamic Sorting):
 List<PersonNode> findByLastName(String lastName, Sort sort);
-List<PersonNode> findAllByOrderByLastNameAsc();
 List<PersonNode> findAll(Sort.by(Direction.DESC, "age", "lastName"));
 ```
 
@@ -341,8 +349,9 @@ void deactivateByLastName(@Param("lastName") String lastName);
 - ✅ Null-Checks (IsNull, IsNotNull) - nur für Properties
 - ✅ Collection-Operatoren (In, NotIn)
 - ✅ Logische Operatoren (AND, OR, NOT)
+- ✅ Sorting via OrderBy in Method Names (Asc/Desc, multiple fields)
 - ❌ Case Insensitive (IgnoreCase, AllIgnoreCase)
-- ❌ Kein Sorting/Ordering
+- ❌ Dynamic Sorting (Sort parameter)
 
 ### 2. **Return Types**
 - ✅ `List<T>` Support
@@ -369,11 +378,11 @@ void deactivateByLastName(@Param("lastName") String lastName);
    - ✅ ~~`IsNull`, `IsNotNull`~~
    - ✅ ~~`In`, `NotIn`~~
 
-2. **Sorting** ⬅️ NÄCHSTER SCHRITT
-   - `Sort` Parameter Support
-   - `OrderBy` in Method Names
+2. **Sorting** ✅ TEILWEISE IMPLEMENTIERT
+   - ✅ ~~`OrderBy` in Method Names~~
+   - ❌ `Sort` Parameter Support (später)
 
-3. **Pagination**
+3. **Pagination** ⬅️ NÄCHSTER SCHRITT
    - `Pageable` Parameter
    - `Page<T>` / `Slice<T>` Return Types
    - `Top` / `First` Keywords
@@ -440,10 +449,10 @@ void deactivateByLastName(@Param("lastName") String lastName);
    - ✅ ~~Füge OR-Unterstützung hinzu~~
    - ❌ Implementiere IgnoreCase (später)
 
-2. **Phase 2 - Sorting & Pagination** ⬅️ AKTUELL
-   - `Sort` Parameter Support
-   - `Pageable` Support mit `Page<T>` / `Slice<T>`
-   - `Top`/`First` Keywords
+2. **Phase 2 - Sorting & Pagination** ✅ SORTING ABGESCHLOSSEN
+   - ✅ ~~`OrderBy` in Method Names~~
+   - ❌ `Sort` Parameter Support (später)
+   - ⏳ **AKTUELL**: Pagination (`Pageable`, `Page<T>`, `Top`/`First`)
 
 3. **Phase 3 - Projections**
    - Interface-Based Projections (Closed)
@@ -470,16 +479,18 @@ void deactivateByLastName(@Param("lastName") String lastName);
 - ✅ Solide Basis mit CRUD, Basic Query Derivation, @Query, Relationships
 - ✅ Bulk Operations, Auditing, Optimistic Locking
 - ✅ Rekursive Relationships funktionieren
-- ✅ **NEU**: Erweiterte Query Derivation Operatoren (GreaterThan, LessThan, Between, Like, Containing, etc.)
-- ✅ **NEU**: OR-Verknüpfung in Query Methods
-- ✅ **NEU**: Boolean, Null-Checks, Collection-Operatoren
+- ✅ Erweiterte Query Derivation Operatoren (GreaterThan, LessThan, Between, Like, Containing, etc.)
+- ✅ OR-Verknüpfung in Query Methods
+- ✅ Boolean, Null-Checks, Collection-Operatoren
+- ✅ **NEU**: Sorting via OrderBy in Method Names (Asc/Desc, multiple fields)
 
 **Hauptlücken:**
-- ❌ Sorting & Pagination
+- ❌ Pagination (Top/First keywords, Pageable parameter)
+- ❌ Dynamic Sorting (Sort parameter)
 - ❌ Projections
 - ❌ Async/Stream Support
 - ❌ Specifications API
 - ❌ Case Insensitive Operatoren
 
 **Nächster Fokus:**
-Sorting & Ordering (OrderBy in method names, Sort parameter) und Pagination (Pageable, Top/First keywords).
+Pagination (Top/First keywords in method names, später Pageable parameter mit Page<T>/Slice<T>).

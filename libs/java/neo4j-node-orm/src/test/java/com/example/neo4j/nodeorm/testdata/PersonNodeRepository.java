@@ -88,4 +88,23 @@ public interface PersonNodeRepository extends Neo4jNodeRepository<PersonNode, St
     void deleteByAgeGreaterThan(Integer age);
 
     void deleteByFirstNameOrLastName(String firstName, String lastName);
+
+    // ========== Sorting & Ordering ==========
+
+    // Simple sorting
+    List<PersonNode> findAllByOrderByAgeAsc();
+
+    List<PersonNode> findAllByOrderByAgeDesc();
+
+    // Multiple field sorting
+    List<PersonNode> findAllByOrderByLastNameAscFirstNameAsc();
+
+    List<PersonNode> findAllByOrderByAgeDescFirstNameAsc();
+
+    // Sorting with criteria
+    List<PersonNode> findByActiveTrueOrderByAgeDesc();
+
+    List<PersonNode> findByLastNameOrderByFirstNameAsc(String lastName);
+
+    List<PersonNode> findByAgeGreaterThanOrderByAgeAscFirstNameDesc(Integer age);
 }

@@ -37,6 +37,12 @@ public class CypherQueryGenerator {
 
         cypher.append(" RETURN n");
 
+        // Add ORDER BY clause
+        String orderByClause = buildOrderByClause(queryMethod, metadata);
+        if (!orderByClause.isEmpty()) {
+            cypher.append(" ORDER BY ").append(orderByClause);
+        }
+
         return cypher.toString();
     }
 
@@ -207,5 +213,36 @@ public class CypherQueryGenerator {
 
         // If not found, assume field name equals property name
         return javaPropertyName;
+    }
+
+    /**
+     * Build ORDER BY clause from sort orders.
+     * Example: "n.age DESC, n.firstName ASC"
+     */
+    private String buildOrderByClause(QueryMethod queryMethod, NodeMetadata metadata) {
+        if (queryMethod.getSortOrders() == null || queryMethod.getSortOrders().isEmpty()) {
+            return "";
+        }
+
+        StringBuilder orderBy = new StringBuilder();
+        boolean first = true;
+
+        for (SortOrder sortOrder : queryMethod.getSortOrders()) {
+            if (!first) {
+                orderBy.append(", ");
+            }
+            first = false;
+
+            String propertyName = getPropertyNameInNeo4j(sortOrder.getPropertyName(), metadata);
+            orderBy.append("n.").append(propertyName);
+
+            if (sortOrder.getDirection() == SortOrder.Direction.DESC) {
+                orderBy.append(" DESC");
+            } else {
+                orderBy.append(" ASC");
+            }
+        }
+
+        return orderBy.toString();
     }
 }

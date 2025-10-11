@@ -28,7 +28,7 @@ public class QueryMethodParser {
         }
 
         String operation = matcher.group(1); // find, findAll, count, etc.
-        String criteria = matcher.group(2);  // FirstName, LastNameAndAge, etc.
+        String criteriaAndSort = matcher.group(2);  // FirstName, LastNameAndAge, etc.
 
         QueryMethod queryMethod = new QueryMethod();
         queryMethod.setMethodName(methodName);
@@ -36,9 +36,31 @@ public class QueryMethodParser {
         queryMethod.setEntityClass(metadata.getNodeClass());
         queryMethod.setReturnType(method.getReturnType());
 
+        // Split criteria and sorting (e.g., "LastNameOrderByAgeDesc" -> criteria="LastName", sort="AgeDesc")
+        String criteria;
+        String sortPart = null;
+        int orderByIndex = criteriaAndSort.indexOf("OrderBy");
+        if (orderByIndex >= 0) {
+            criteria = criteriaAndSort.substring(0, orderByIndex);
+            sortPart = criteriaAndSort.substring(orderByIndex + 7); // Skip "OrderBy"
+        } else {
+            criteria = criteriaAndSort;
+        }
+
         // Parse criteria (e.g., "FirstNameAndAge" -> ["FirstName", "Age"])
-        List<QueryCriteria> criteriaList = parseCriteria(criteria, method);
-        queryMethod.setCriteria(criteriaList);
+        if (!criteria.isEmpty()) {
+            List<QueryCriteria> criteriaList = parseCriteria(criteria, method);
+            queryMethod.setCriteria(criteriaList);
+        } else {
+            // No criteria - empty list instead of null
+            queryMethod.setCriteria(new ArrayList<>());
+        }
+
+        // Parse sorting (e.g., "AgeDescFirstNameAsc" -> [SortOrder("age", DESC), SortOrder("firstName", ASC)])
+        if (sortPart != null && !sortPart.isEmpty()) {
+            List<SortOrder> sortOrders = parseSortOrders(sortPart);
+            queryMethod.setSortOrders(sortOrders);
+        }
 
         return queryMethod;
     }
@@ -215,6 +237,42 @@ public class QueryMethodParser {
     private static class OperatorParseResult {
         String propertyName;
         QueryOperator operator;
+    }
+
+    private List<SortOrder> parseSortOrders(String sortPart) {
+        List<SortOrder> sortOrders = new ArrayList<>();
+
+        // Parse sort orders like "AgeDescFirstNameAsc" or "LastNameAsc"
+        // We need to split by Asc/Desc keywords
+        int i = 0;
+        StringBuilder currentProperty = new StringBuilder();
+
+        while (i < sortPart.length()) {
+            if (sortPart.startsWith("Desc", i)) {
+                // Found DESC - add sort order
+                String propertyName = toCamelCase(currentProperty.toString());
+                sortOrders.add(new SortOrder(propertyName, SortOrder.Direction.DESC));
+                currentProperty = new StringBuilder();
+                i += 4; // Skip "Desc"
+            } else if (sortPart.startsWith("Asc", i)) {
+                // Found ASC - add sort order
+                String propertyName = toCamelCase(currentProperty.toString());
+                sortOrders.add(new SortOrder(propertyName, SortOrder.Direction.ASC));
+                currentProperty = new StringBuilder();
+                i += 3; // Skip "Asc"
+            } else {
+                currentProperty.append(sortPart.charAt(i));
+                i++;
+            }
+        }
+
+        // If there's remaining property without Asc/Desc, default to ASC
+        if (currentProperty.length() > 0) {
+            String propertyName = toCamelCase(currentProperty.toString());
+            sortOrders.add(new SortOrder(propertyName, SortOrder.Direction.ASC));
+        }
+
+        return sortOrders;
     }
 
     private String toCamelCase(String input) {
