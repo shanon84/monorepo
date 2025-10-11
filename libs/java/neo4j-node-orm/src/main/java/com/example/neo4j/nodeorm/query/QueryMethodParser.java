@@ -46,30 +46,175 @@ public class QueryMethodParser {
     private List<QueryCriteria> parseCriteria(String criteriaString, Method method) {
         List<QueryCriteria> criteriaList = new ArrayList<>();
 
-        // Split by "And" and "Or" (for now only support And)
-        String[] parts = criteriaString.split("And");
+        // Split by "And" and "Or"
+        List<String> parts = splitByLogicalOperators(criteriaString);
+        List<String> operators = extractLogicalOperators(criteriaString);
 
         java.lang.reflect.Parameter[] parameters = method.getParameters();
         int paramIndex = 0;
 
-        for (String part : parts) {
+        for (int i = 0; i < parts.size(); i++) {
+            String part = parts.get(i);
             QueryCriteria criteria = new QueryCriteria();
 
-            // Convert camelCase to property name (e.g., "LastName" -> "lastName")
-            String propertyName = toCamelCase(part);
-            criteria.setPropertyName(propertyName);
-            criteria.setOperator(QueryOperator.EQUALS); // Default operator
+            // Extract operator and property name from part
+            OperatorParseResult result = extractOperatorAndProperty(part);
+            criteria.setPropertyName(result.propertyName);
+            criteria.setOperator(result.operator);
 
-            // Get parameter name
-            if (paramIndex < parameters.length) {
-                criteria.setParameterName(parameters[paramIndex].getName());
-                paramIndex++;
+            // Set logical operator (AND/OR) for chaining
+            if (i > 0 && i - 1 < operators.size()) {
+                criteria.setLogicalOperator(operators.get(i - 1));
+            }
+
+            // Get parameter name(s) - some operators need multiple params (e.g., Between)
+            if (result.operator == QueryOperator.BETWEEN) {
+                if (paramIndex < parameters.length) {
+                    criteria.setParameterName(parameters[paramIndex].getName());
+                    paramIndex++;
+                }
+                if (paramIndex < parameters.length) {
+                    criteria.setParameterName2(parameters[paramIndex].getName());
+                    paramIndex++;
+                }
+            } else if (result.operator == QueryOperator.IS_NULL || result.operator == QueryOperator.IS_NOT_NULL
+                    || result.operator == QueryOperator.IS_TRUE || result.operator == QueryOperator.IS_FALSE) {
+                // No parameter needed
+            } else {
+                if (paramIndex < parameters.length) {
+                    criteria.setParameterName(parameters[paramIndex].getName());
+                    paramIndex++;
+                }
             }
 
             criteriaList.add(criteria);
         }
 
         return criteriaList;
+    }
+
+    private List<String> splitByLogicalOperators(String criteriaString) {
+        // Split by "And" and "Or" but preserve order
+        List<String> parts = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        int i = 0;
+        while (i < criteriaString.length()) {
+            if (criteriaString.startsWith("And", i)) {
+                parts.add(current.toString());
+                current = new StringBuilder();
+                i += 3;
+            } else if (criteriaString.startsWith("Or", i)) {
+                parts.add(current.toString());
+                current = new StringBuilder();
+                i += 2;
+            } else {
+                current.append(criteriaString.charAt(i));
+                i++;
+            }
+        }
+        if (current.length() > 0) {
+            parts.add(current.toString());
+        }
+
+        return parts;
+    }
+
+    private List<String> extractLogicalOperators(String criteriaString) {
+        List<String> operators = new ArrayList<>();
+        int i = 0;
+        while (i < criteriaString.length()) {
+            if (criteriaString.startsWith("And", i)) {
+                operators.add("AND");
+                i += 3;
+            } else if (criteriaString.startsWith("Or", i)) {
+                operators.add("OR");
+                i += 2;
+            } else {
+                i++;
+            }
+        }
+        return operators;
+    }
+
+    private OperatorParseResult extractOperatorAndProperty(String part) {
+        OperatorParseResult result = new OperatorParseResult();
+
+        // Check for operators (order matters - check longer keywords first!)
+        if (part.endsWith("IsNotNull")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 9));
+            result.operator = QueryOperator.IS_NOT_NULL;
+        } else if (part.endsWith("IsNull")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 6));
+            result.operator = QueryOperator.IS_NULL;
+        } else if (part.endsWith("NotContaining")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 13));
+            result.operator = QueryOperator.NOT_CONTAINING;
+        } else if (part.endsWith("Containing")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 10));
+            result.operator = QueryOperator.CONTAINING;
+        } else if (part.endsWith("StartingWith")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 12));
+            result.operator = QueryOperator.STARTING_WITH;
+        } else if (part.endsWith("EndingWith")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 10));
+            result.operator = QueryOperator.ENDING_WITH;
+        } else if (part.endsWith("GreaterThanEqual")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 16));
+            result.operator = QueryOperator.GREATER_THAN_EQUAL;
+        } else if (part.endsWith("GreaterThan")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 11));
+            result.operator = QueryOperator.GREATER_THAN;
+        } else if (part.endsWith("LessThanEqual")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 13));
+            result.operator = QueryOperator.LESS_THAN_EQUAL;
+        } else if (part.endsWith("LessThan")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 8));
+            result.operator = QueryOperator.LESS_THAN;
+        } else if (part.endsWith("Between")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 7));
+            result.operator = QueryOperator.BETWEEN;
+        } else if (part.endsWith("NotLike")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 7));
+            result.operator = QueryOperator.NOT_LIKE;
+        } else if (part.endsWith("Like")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 4));
+            result.operator = QueryOperator.LIKE;
+        } else if (part.endsWith("NotIn")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 5));
+            result.operator = QueryOperator.NOT_IN;
+        } else if (part.endsWith("In")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 2));
+            result.operator = QueryOperator.IN;
+        } else if (part.endsWith("Not")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 3));
+            result.operator = QueryOperator.NOT_EQUALS;
+        } else if (part.endsWith("IsTrue") || part.endsWith("True")) {
+            int suffixLength = part.endsWith("IsTrue") ? 6 : 4;
+            result.propertyName = toCamelCase(part.substring(0, part.length() - suffixLength));
+            result.operator = QueryOperator.IS_TRUE;
+        } else if (part.endsWith("IsFalse") || part.endsWith("False")) {
+            int suffixLength = part.endsWith("IsFalse") ? 7 : 5;
+            result.propertyName = toCamelCase(part.substring(0, part.length() - suffixLength));
+            result.operator = QueryOperator.IS_FALSE;
+        } else if (part.endsWith("Before")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 6));
+            result.operator = QueryOperator.BEFORE;
+        } else if (part.endsWith("After")) {
+            result.propertyName = toCamelCase(part.substring(0, part.length() - 5));
+            result.operator = QueryOperator.AFTER;
+        } else {
+            // Default: EQUALS
+            result.propertyName = toCamelCase(part);
+            result.operator = QueryOperator.EQUALS;
+        }
+
+        return result;
+    }
+
+    private static class OperatorParseResult {
+        String propertyName;
+        QueryOperator operator;
     }
 
     private String toCamelCase(String input) {

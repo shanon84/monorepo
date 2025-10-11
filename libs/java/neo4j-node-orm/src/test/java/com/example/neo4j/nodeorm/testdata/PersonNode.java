@@ -50,4 +50,6 @@ public class PersonNode {
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
+
+    private Boolean active;
 }
