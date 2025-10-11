@@ -16,9 +16,9 @@ public class Neo4jDeleteService {
     private final Neo4jDeletePersistence deletePersistence;
     private final NodeMetadataExtractor metadataExtractor;
 
-    public <T> void deleteById(String id, Class<T> entityClass) {
+    public <T, ID> void deleteById(ID id, Class<T> entityClass) {
         NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
-        deletePersistence.deleteNodeById(id, metadata);
+        deletePersistence.deleteNodeById(String.valueOf(id), metadata);
     }
 
     public <T> void delete(T entity) {
@@ -26,20 +26,20 @@ public class Neo4jDeleteService {
         Field idField = metadata.getIdField().getField();
 
         try {
-            String id = (String) idField.get(entity);
+            Object id = idField.get(entity);
             if (id == null) {
                 throw new IllegalArgumentException("Cannot delete entity without ID");
             }
-            deletePersistence.deleteNodeById(id, metadata);
+            deletePersistence.deleteNodeById(String.valueOf(id), metadata);
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Failed to access ID field", e);
         }
     }
 
-    public <T> void deleteAllById(Iterable<String> ids, Class<T> entityClass) {
+    public <T, ID> void deleteAllById(Iterable<ID> ids, Class<T> entityClass) {
         NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
         List<String> idList = new ArrayList<>();
-        ids.forEach(idList::add);
+        ids.forEach(id -> idList.add(String.valueOf(id)));
         deletePersistence.deleteNodesById(idList, metadata);
     }
 
@@ -55,9 +55,9 @@ public class Neo4jDeleteService {
         List<String> ids = new ArrayList<>();
         try {
             for (T entity : entities) {
-                String id = (String) idField.get(entity);
+                Object id = idField.get(entity);
                 if (id != null) {
-                    ids.add(id);
+                    ids.add(String.valueOf(id));
                 }
             }
         } catch (IllegalAccessException e) {

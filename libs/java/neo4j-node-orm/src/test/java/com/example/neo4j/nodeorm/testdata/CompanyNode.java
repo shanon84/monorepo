@@ -17,7 +17,7 @@ public class CompanyNode {
 
     @Id
     @GeneratedValue(GeneratedValue.UUIDGenerator.class)
-    private Long id;
+    private String id;
 
     @Unique
     private String name;

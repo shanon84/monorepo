@@ -16,7 +16,7 @@ public class ProjectNode {
 
     @Id
     @GeneratedValue(GeneratedValue.UUIDGenerator.class)
-    private Long id;
+    private String id;
 
     private String projectName;
 

@@ -106,7 +106,7 @@ class Neo4jNodeRepositoryAuditIT {
         List<PersonNode> savedPersons = StreamSupport.stream(personNodeRepository.saveAll(persons).spliterator(), false)
                 .toList();
 
-        Long personId = savedPersons.get(0).getId();
+        String personId = savedPersons.get(0).getId();
 
         // Retrieve from database using direct Cypher query
         var foundPerson = neo4jClient.query(
@@ -119,7 +119,7 @@ class Neo4jNodeRepositoryAuditIT {
                 .fetchAs(PersonNode.class)
                 .mappedBy((typeSystem, record) -> {
                     PersonNode node = new PersonNode();
-                    node.setId(record.get("id").asLong());
+                    node.setId(record.get("id").asString());
                     node.setFirstName(record.get("firstName").asString());
                     node.setLastName(record.get("lastName").asString());
                     node.setAge(record.get("age").asInt());
@@ -224,7 +224,7 @@ class Neo4jNodeRepositoryAuditIT {
         List<PersonNode> savedPersons = StreamSupport.stream(personNodeRepository.saveAll(persons).spliterator(), false)
                 .toList();
 
-        Long personId = savedPersons.get(0).getId();
+        String personId = savedPersons.get(0).getId();
 
         // Query Neo4j directly to verify audit fields are stored
         var result = neo4jClient.query(

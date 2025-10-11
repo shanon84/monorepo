@@ -18,18 +18,65 @@ public class Neo4jSavePersistence {
 
     private final Neo4jClient neo4jClient;
 
-    public Map<Object, Object> saveNodesBulk(
+    public boolean nodeExistsById(Object id, NodeMetadata metadata) {
+        String nodeName = metadata.getNodeName();
+        String idPropertyName = metadata.getIdField().getFieldName();
+
+        String cypher = "MATCH (n:" + nodeName + ") WHERE n." + idPropertyName + " = $id RETURN count(n) > 0 AS exists";
+
+        Map<String, Object> result = neo4jClient.query(cypher)
+                .bind(id).to("id")
+                .fetch()
+                .one()
+                .orElse(Map.of("exists", false));
+
+        return (Boolean) result.get("exists");
+    }
+
+    public void updateNodesBulk(
             List<Object> nodes,
             NodeMetadata metadata
     ) {
         String nodeName = metadata.getNodeName();
         String idPropertyName = metadata.getIdField().getFieldName();
 
-        // Build UNWIND query for bulk CREATE (simplified - audit fields are now in properties)
+        // Build UNWIND query for bulk UPDATE (only modified fields)
+        StringBuilder cypher = new StringBuilder("UNWIND $nodes AS node\n");
+        cypher.append("MATCH (n:").append(nodeName).append(") WHERE n.").append(idPropertyName).append(" = node.id\n");
+        cypher.append("SET n += node.properties");
+
+        // Prepare node data
+        List<Map<String, Object>> nodeData = new ArrayList<>();
+        for (Object node : nodes) {
+            Map<String, Object> properties = extractNodePropertiesWithoutId(node, metadata);
+
+            Map<String, Object> nodeEntry = new HashMap<>();
+            try {
+                nodeEntry.put("id", metadata.getIdField().getField().get(node));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Failed to access ID field on node", e);
+            }
+            nodeEntry.put("properties", properties);
+
+            nodeData.add(nodeEntry);
+        }
+
+        // Execute bulk update
+        neo4jClient.query(cypher.toString())
+                .bind(nodeData).to("nodes")
+                .run();
+    }
+
+    public void createNodesBulk(
+            List<Object> nodes,
+            NodeMetadata metadata
+    ) {
+        String nodeName = metadata.getNodeName();
+
+        // Build UNWIND query for bulk CREATE
         StringBuilder cypher = new StringBuilder("UNWIND $nodes AS node\n");
         cypher.append("CREATE (n:").append(nodeName).append(")\n");
-        cypher.append("SET n = node.properties\n");
-        cypher.append("RETURN node.tempId AS tempId, id(n) AS generatedId");
+        cypher.append("SET n = node.properties");
 
         // Prepare node data
         List<Map<String, Object>> nodeData = new ArrayList<>();
@@ -37,32 +84,15 @@ public class Neo4jSavePersistence {
             Map<String, Object> properties = extractNodeProperties(node, metadata);
 
             Map<String, Object> nodeEntry = new HashMap<>();
-            nodeEntry.put("tempId", System.identityHashCode(node));
             nodeEntry.put("properties", properties);
 
             nodeData.add(nodeEntry);
         }
 
-        // Execute bulk create and collect results
-        List<Map<String, Object>> results = neo4jClient.query(cypher.toString())
+        // Execute bulk create
+        neo4jClient.query(cypher.toString())
                 .bind(nodeData).to("nodes")
-                .fetch()
-                .all()
-                .stream()
-                .toList();
-
-        // Build map: node -> generatedId
-        Map<Object, Object> idMap = new HashMap<>();
-        for (int i = 0; i < nodes.size(); i++) {
-            Map<String, Object> result = results.get(i);
-            Long generatedId = (Long) result.get("generatedId");
-
-            // Map node to generatedId
-            Object node = nodes.get(i);
-            idMap.put(node, generatedId);
-        }
-
-        return idMap;
+                .run();
     }
 
     private Map<String, Object> extractNodeProperties(Object node, NodeMetadata metadata) {
@@ -77,6 +107,24 @@ public class Neo4jSavePersistence {
             }
 
             // Add all other properties (including audit fields now)
+            for (PropertyMetadata property : metadata.getProperties()) {
+                Object value = property.getField().get(node);
+                if (value != null) {
+                    properties.put(property.getPropertyName(), value);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to access field on node", e);
+        }
+
+        return properties;
+    }
+
+    private Map<String, Object> extractNodePropertiesWithoutId(Object node, NodeMetadata metadata) {
+        Map<String, Object> properties = new HashMap<>();
+
+        try {
+            // Add all properties EXCEPT ID field (including audit fields)
             for (PropertyMetadata property : metadata.getProperties()) {
                 Object value = property.getField().get(node);
                 if (value != null) {

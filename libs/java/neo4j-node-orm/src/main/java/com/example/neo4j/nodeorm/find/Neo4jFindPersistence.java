@@ -106,7 +106,9 @@ public class Neo4jFindPersistence {
             for (PropertyMetadata property : metadata.getProperties()) {
                 Object value = nodeProperties.get(property.getPropertyName());
                 if (value != null) {
-                    property.getField().set(entity, value);
+                    // Convert type if necessary (Neo4j returns Long for all integers)
+                    Object convertedValue = convertValueToFieldType(value, property.getField().getType());
+                    property.getField().set(entity, convertedValue);
                 }
             }
 
@@ -114,5 +116,49 @@ public class Neo4jFindPersistence {
         } catch (Exception e) {
             throw new RuntimeException("Failed to map node to entity: " + entityClass.getName(), e);
         }
+    }
+
+    private Object convertValueToFieldType(Object value, Class<?> targetType) {
+        if (value == null) {
+            return null;
+        }
+
+        // If types match, return as-is
+        if (targetType.isAssignableFrom(value.getClass())) {
+            return value;
+        }
+
+        // Handle Neo4j Long -> Integer conversion
+        if (targetType == Integer.class && value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+
+        // Handle Neo4j Long -> int conversion
+        if (targetType == int.class && value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+
+        // Handle Neo4j Long -> Short conversion
+        if (targetType == Short.class && value instanceof Long) {
+            return ((Long) value).shortValue();
+        }
+
+        // Handle Neo4j Long -> short conversion
+        if (targetType == short.class && value instanceof Long) {
+            return ((Long) value).shortValue();
+        }
+
+        // Handle Neo4j Long -> Byte conversion
+        if (targetType == Byte.class && value instanceof Long) {
+            return ((Long) value).byteValue();
+        }
+
+        // Handle Neo4j Long -> byte conversion
+        if (targetType == byte.class && value instanceof Long) {
+            return ((Long) value).byteValue();
+        }
+
+        // No conversion needed/possible
+        return value;
     }
 }

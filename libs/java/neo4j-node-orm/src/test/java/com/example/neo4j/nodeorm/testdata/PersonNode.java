@@ -19,7 +19,7 @@ public class PersonNode {
 
     @Id
     @GeneratedValue(GeneratedValue.UUIDGenerator.class)
-    private Long id;
+    private String id;
 
     @Property("firstName")
     private String firstName;

@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +28,12 @@ public class Neo4jSaveService {
     public <S> List<S> saveAll(List<S> entities) {
         // Collect all nodes to save (including related nodes)
         Set<Object> allNodesToSave = new LinkedHashSet<>();
-        Map<Object, NodeMetadata> nodeMetadataMap = new HashMap<>();
 
         for (Object entity : entities) {
-            collectNodesToSave(entity, allNodesToSave, nodeMetadataMap);
+            collectNodesToSave(entity, allNodesToSave);
         }
 
         // Process each node: validate, generate ID, set audit fields
-        // Use ID (or temp ID) as key for all subsequent operations
-        Map<Object, Object> nodeIdMap = new LinkedHashMap<>();
-
         for (Object node : allNodesToSave) {
             // 1. Validate
             nodeValidator.validateNodeAnnotation(node.getClass());
@@ -50,22 +44,20 @@ public class Neo4jSaveService {
             // 3. Determine if create or update (BEFORE generating ID)
             boolean isCreate = isNewNode(node, metadata);
 
-            // 4. Generate or get ID
-            Object nodeId = getOrGenerateId(node, metadata);
-            nodeIdMap.put(node, nodeId);
+            // 4. Generate or get ID (sets ID on the node object)
+            getOrGenerateId(node, metadata);
 
             // 5. Set audit fields directly on entity
             auditFieldPopulatorService.populateAuditFieldsOnNode(node, metadata, isCreate);
         }
 
-        // 6. Extract properties from entities (last step - after audit fields are set)
-        // 7. Save all nodes in bulk
-        saveNodesInBulk(allNodesToSave, nodeIdMap);
+        // 6. Save all nodes in bulk
+        saveNodesInBulk(allNodesToSave);
 
-        // 8. Create relationships
+        // 7. Create relationships
         for (Object entity : entities) {
             NodeMetadata metadata = metadataExtractor.extractMetadata(entity.getClass());
-            createRelationshipsForEntity(entity, metadata, nodeIdMap);
+            createRelationshipsForEntity(entity, metadata);
         }
 
         return entities;
@@ -98,8 +90,7 @@ public class Neo4jSaveService {
 
     private void collectNodesToSave(
             Object entity,
-            Set<Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
+            Set<Object> allNodesToSave
     ) {
         if (entity == null || allNodesToSave.contains(entity)) {
             return;
@@ -107,16 +98,14 @@ public class Neo4jSaveService {
 
         allNodesToSave.add(entity);
         NodeMetadata metadata = metadataExtractor.extractMetadata(entity.getClass());
-        nodeMetadataMap.put(entity, metadata);
 
-        collectRelatedNodes(entity, metadata, allNodesToSave, nodeMetadataMap);
+        collectRelatedNodes(entity, metadata, allNodesToSave);
     }
 
     private void collectRelatedNodes(
             Object entity,
             NodeMetadata metadata,
-            Set<Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
+            Set<Object> allNodesToSave
     ) {
         for (RelationshipMetadata relationship : metadata.getRelationships()) {
             Object relatedValue = reflectionService.getFieldValue(relationship.getField(), entity);
@@ -126,27 +115,23 @@ public class Neo4jSaveService {
             }
 
             if (relationship.isCollection()) {
-                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, allNodesToSave, nodeMetadataMap);
+                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, allNodesToSave);
             } else {
-                collectNodesToSave(relatedValue, allNodesToSave, nodeMetadataMap);
+                collectNodesToSave(relatedValue, allNodesToSave);
             }
         }
     }
 
     private void collectRelatedEntitiesFromCollection(
             Collection<?> relatedEntities,
-            Set<Object> allNodesToSave,
-            Map<Object, NodeMetadata> nodeMetadataMap
+            Set<Object> allNodesToSave
     ) {
         for (Object relatedEntity : relatedEntities) {
-            collectNodesToSave(relatedEntity, allNodesToSave, nodeMetadataMap);
+            collectNodesToSave(relatedEntity, allNodesToSave);
         }
     }
 
-    private void saveNodesInBulk(
-            Set<Object> allNodesToSave,
-            Map<Object, Object> nodeIdMap
-    ) {
+    private void saveNodesInBulk(Set<Object> allNodesToSave) {
         // Group nodes by type
         Map<Class<?>, List<Object>> nodesByType = allNodesToSave.stream()
                 .collect(java.util.stream.Collectors.groupingBy(Object::getClass));
@@ -157,22 +142,50 @@ public class Neo4jSaveService {
             List<Object> nodes = entry.getValue();
             NodeMetadata metadata = metadataExtractor.extractMetadata(nodeClass);
 
-            Map<Object, Object> generatedIds = savePersistence.saveNodesBulk(nodes, metadata);
+            // Separate nodes into CREATE and UPDATE lists
+            List<Object> nodesToCreate = new java.util.ArrayList<>();
+            List<Object> nodesToUpdate = new java.util.ArrayList<>();
 
-            // Update the nodeIdMap with generated IDs from Neo4j
-            nodeIdMap.putAll(generatedIds);
+            for (Object node : nodes) {
+                // Get ID directly from node object
+                Object nodeId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
+
+                if (nodeId != null) {
+                    // Real ID exists - check if node exists in DB
+                    boolean exists = savePersistence.nodeExistsById(nodeId, metadata);
+                    if (exists) {
+                        nodesToUpdate.add(node);
+                    } else {
+                        nodesToCreate.add(node);
+                    }
+                } else {
+                    // No ID - definitely a new node
+                    nodesToCreate.add(node);
+                }
+            }
+
+            // Execute bulk CREATE
+            if (!nodesToCreate.isEmpty()) {
+                savePersistence.createNodesBulk(nodesToCreate, metadata);
+            }
+
+            // Execute bulk UPDATE
+            if (!nodesToUpdate.isEmpty()) {
+                savePersistence.updateNodesBulk(nodesToUpdate, metadata);
+            }
         }
     }
 
-    private void createRelationshipsForEntity(Object entity, NodeMetadata metadata, Map<Object, Object> nodeIdMap) {
-        Object sourceId = nodeIdMap.get(entity);
+    private void createRelationshipsForEntity(Object entity, NodeMetadata metadata) {
+        // Get ID directly from entity
+        Object sourceId = reflectionService.getFieldValue(metadata.getIdField().getField(), entity);
 
         if (sourceId == null) {
             return;
         }
 
         for (RelationshipMetadata relationship : metadata.getRelationships()) {
-            createRelationshipForField(entity, sourceId, relationship, metadata, nodeIdMap);
+            createRelationshipForField(entity, sourceId, relationship, metadata);
         }
     }
 
@@ -180,8 +193,7 @@ public class Neo4jSaveService {
             Object entity,
             Object sourceId,
             RelationshipMetadata relationship,
-            NodeMetadata sourceMetadata,
-            Map<Object, Object> nodeIdMap
+            NodeMetadata sourceMetadata
     ) {
         Object relatedValue = reflectionService.getFieldValue(relationship.getField(), entity);
 
@@ -190,7 +202,7 @@ public class Neo4jSaveService {
         }
 
         NodeMetadata targetMetadata = metadataExtractor.extractMetadata(relationship.getTargetType());
-        List<Object> targetIds = collectTargetIds(relatedValue, relationship, nodeIdMap);
+        List<Object> targetIds = collectTargetIds(relatedValue, relationship, targetMetadata);
 
         if (targetIds.isEmpty()) {
             return;
@@ -199,26 +211,27 @@ public class Neo4jSaveService {
         savePersistence.createRelationshipsBulk(sourceId, targetIds, relationship, sourceMetadata, targetMetadata);
     }
 
-    private List<Object> collectTargetIds(Object relatedValue, RelationshipMetadata relationship, Map<Object, Object> nodeIdMap) {
+    private List<Object> collectTargetIds(Object relatedValue, RelationshipMetadata relationship, NodeMetadata targetMetadata) {
         List<Object> targetIds = new java.util.ArrayList<>();
 
         if (relationship.isCollection()) {
-            collectTargetIdsFromCollection((Collection<?>) relatedValue, nodeIdMap, targetIds);
+            collectTargetIdsFromCollection((Collection<?>) relatedValue, targetMetadata, targetIds);
         } else {
-            addTargetIdIfExists(relatedValue, nodeIdMap, targetIds);
+            addTargetIdIfExists(relatedValue, targetMetadata, targetIds);
         }
 
         return targetIds;
     }
 
-    private void collectTargetIdsFromCollection(Collection<?> relatedEntities, Map<Object, Object> nodeIdMap, List<Object> targetIds) {
+    private void collectTargetIdsFromCollection(Collection<?> relatedEntities, NodeMetadata targetMetadata, List<Object> targetIds) {
         for (Object relatedEntity : relatedEntities) {
-            addTargetIdIfExists(relatedEntity, nodeIdMap, targetIds);
+            addTargetIdIfExists(relatedEntity, targetMetadata, targetIds);
         }
     }
 
-    private void addTargetIdIfExists(Object relatedEntity, Map<Object, Object> nodeIdMap, List<Object> targetIds) {
-        Object targetId = nodeIdMap.get(relatedEntity);
+    private void addTargetIdIfExists(Object relatedEntity, NodeMetadata targetMetadata, List<Object> targetIds) {
+        // Get ID directly from related entity
+        Object targetId = reflectionService.getFieldValue(targetMetadata.getIdField().getField(), relatedEntity);
 
         if (targetId != null) {
             targetIds.add(targetId);

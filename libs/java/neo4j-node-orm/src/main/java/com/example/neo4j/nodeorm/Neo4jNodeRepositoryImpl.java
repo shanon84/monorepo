@@ -13,7 +13,7 @@ import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
-public class Neo4jNodeRepositoryImpl<T> implements Neo4jNodeRepository<T> {
+public class Neo4jNodeRepositoryImpl<T, ID> implements Neo4jNodeRepository<T, ID> {
 
     private final Neo4jSaveService saveService;
     private final Neo4jFindService findService;
@@ -41,13 +41,13 @@ public class Neo4jNodeRepositoryImpl<T> implements Neo4jNodeRepository<T> {
     }
 
     @Override
-    public Optional<T> findById(String id) {
+    public Optional<T> findById(ID id) {
         ensureEntityClassSet();
         return findService.findById(id, entityClass);
     }
 
     @Override
-    public boolean existsById(String id) {
+    public boolean existsById(ID id) {
         ensureEntityClassSet();
         return findService.existsById(id, entityClass);
     }
@@ -59,7 +59,7 @@ public class Neo4jNodeRepositoryImpl<T> implements Neo4jNodeRepository<T> {
     }
 
     @Override
-    public Iterable<T> findAllById(Iterable<String> ids) {
+    public Iterable<T> findAllById(Iterable<ID> ids) {
         ensureEntityClassSet();
         return findService.findAllById(ids, entityClass);
     }
@@ -71,7 +71,7 @@ public class Neo4jNodeRepositoryImpl<T> implements Neo4jNodeRepository<T> {
     }
 
     @Override
-    public void deleteById(String id) {
+    public void deleteById(ID id) {
         ensureEntityClassSet();
         deleteService.deleteById(id, entityClass);
     }
@@ -82,9 +82,9 @@ public class Neo4jNodeRepositoryImpl<T> implements Neo4jNodeRepository<T> {
     }
 
     @Override
-    public void deleteAllById(Iterable<? extends String> ids) {
+    public void deleteAllById(Iterable<? extends ID> ids) {
         ensureEntityClassSet();
-        deleteService.deleteAllById((Iterable<String>) ids, entityClass);
+        deleteService.deleteAllById((Iterable<ID>) ids, entityClass);
     }
 
     @Override

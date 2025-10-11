@@ -40,8 +40,8 @@ public class TestRepositoryConfiguration {
     }
 
     @SuppressWarnings("unchecked")
-    private <T, R extends Neo4jNodeRepository<T>> R createTypedRepository(Class<R> repositoryInterface) {
-        Neo4jNodeRepositoryImpl<T> impl = new Neo4jNodeRepositoryImpl<>(saveService, findService, deleteService);
+    private <T, ID, R extends Neo4jNodeRepository<T, ID>> R createTypedRepository(Class<R> repositoryInterface) {
+        Neo4jNodeRepositoryImpl<T, ID> impl = new Neo4jNodeRepositoryImpl<>(saveService, findService, deleteService);
 
         return (R) Proxy.newProxyInstance(
                 repositoryInterface.getClassLoader(),

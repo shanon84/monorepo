@@ -5,6 +5,7 @@ import com.example.neo4j.nodeorm.metadata.NodeMetadataExtractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,14 +16,14 @@ public class Neo4jFindService {
     private final Neo4jFindPersistence findPersistence;
     private final NodeMetadataExtractor metadataExtractor;
 
-    public <T> Optional<T> findById(String id, Class<T> entityClass) {
+    public <T, ID> Optional<T> findById(ID id, Class<T> entityClass) {
         NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
-        return findPersistence.findNodeById(id, metadata, entityClass);
+        return findPersistence.findNodeById(String.valueOf(id), metadata, entityClass);
     }
 
-    public <T> boolean existsById(String id, Class<T> entityClass) {
+    public <T, ID> boolean existsById(ID id, Class<T> entityClass) {
         NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
-        return findPersistence.existsNodeById(id, metadata);
+        return findPersistence.existsNodeById(String.valueOf(id), metadata);
     }
 
     public <T> List<T> findAll(Class<T> entityClass) {
@@ -30,9 +31,11 @@ public class Neo4jFindService {
         return findPersistence.findAllNodes(metadata, entityClass);
     }
 
-    public <T> List<T> findAllById(Iterable<String> ids, Class<T> entityClass) {
+    public <T, ID> List<T> findAllById(Iterable<ID> ids, Class<T> entityClass) {
         NodeMetadata metadata = metadataExtractor.extractMetadata(entityClass);
-        return findPersistence.findAllNodesById(ids, metadata, entityClass);
+        List<String> stringIds = new ArrayList<>();
+        ids.forEach(id -> stringIds.add(String.valueOf(id)));
+        return findPersistence.findAllNodesById(stringIds, metadata, entityClass);
     }
 
     public <T> long count(Class<T> entityClass) {

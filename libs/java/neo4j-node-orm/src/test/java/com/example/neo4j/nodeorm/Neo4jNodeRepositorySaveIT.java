@@ -18,6 +18,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -193,5 +194,89 @@ class Neo4jNodeRepositorySaveIT {
         // Then
         assertThat(savedPersons.get(0).getId()).isNotNull();
         assertThat(person.getId()).isNotNull(); // Original object should also have ID
+    }
+
+    @Test
+    void shouldUpdateNodeWhenIdIsSetAndNodeExists() {
+        // Given - Create a node first
+        SimpleNode node = new SimpleNode()
+                .setName("Original Name");
+
+        SimpleNode savedNode = simpleNodeRepository.save(node);
+        String savedId = savedNode.getId();
+
+        // When - Update the node by setting the ID and changing properties
+        SimpleNode updateNode = new SimpleNode()
+                .setId(savedId)
+                .setName("Updated Name");
+
+        SimpleNode updatedNode = simpleNodeRepository.save(updateNode);
+
+        // Then - Verify the node was updated
+        assertThat(updatedNode.getId()).isEqualTo(savedId);
+        assertThat(updatedNode.getName()).isEqualTo("Updated Name");
+
+        // Verify in DB
+        SimpleNode foundNode = simpleNodeRepository.findById(savedId).orElseThrow();
+        assertThat(foundNode.getName()).isEqualTo("Updated Name");
+    }
+
+    @Test
+    void shouldCreateNodeWhenIdIsSetButNodeDoesNotExist() {
+        // Given - A node with an ID that doesn't exist in DB
+        SimpleNode node = new SimpleNode()
+                .setId("non-existing-uuid")
+                .setName("New Node with ID");
+
+        // When
+        SimpleNode savedNode = simpleNodeRepository.save(node);
+
+        // Then - Node should be created with the specified ID
+        assertThat(savedNode.getId()).isEqualTo("non-existing-uuid");
+        assertThat(savedNode.getName()).isEqualTo("New Node with ID");
+
+        // Verify in DB
+        SimpleNode foundNode = simpleNodeRepository.findById("non-existing-uuid").orElseThrow();
+        assertThat(foundNode.getName()).isEqualTo("New Node with ID");
+    }
+
+    @Test
+    void shouldUpdatePersonNodeWithAuditFields() {
+        // Given - Create a person first
+        PersonNode person = new PersonNode()
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setAge(30);
+
+        List<PersonNode> savedPersons = StreamSupport.stream(personNodeRepository.saveAll(List.of(person)).spliterator(), false).toList();
+        PersonNode savedPerson = savedPersons.get(0);
+
+        String savedId = savedPerson.getId();
+        String originalCreatedBy = savedPerson.getCreatedBy();
+        var originalCreatedDate = savedPerson.getCreatedDate();
+
+        // When - Update the person
+        PersonNode updatePerson = new PersonNode()
+                .setId(savedId)
+                .setFirstName("John")
+                .setLastName("Smith") // Changed
+                .setAge(31); // Changed
+
+        List<PersonNode> updatedPersons = StreamSupport.stream(personNodeRepository.saveAll(List.of(updatePerson)).spliterator(), false).toList();
+        PersonNode updatedPerson = updatedPersons.get(0);
+
+        // Then - Verify updated fields
+        assertThat(updatedPerson.getId()).isEqualTo(savedId);
+        assertThat(updatedPerson.getLastName()).isEqualTo("Smith");
+        assertThat(updatedPerson.getAge()).isEqualTo(31);
+
+
+        Optional<PersonNode> loadedPersonNodeOpt = personNodeRepository.findById(savedId);
+        assertThat(loadedPersonNodeOpt).isPresent();
+        PersonNode loadedPersonNode = loadedPersonNodeOpt.get();
+
+        assertThat(loadedPersonNode.getCreatedBy()).isEqualTo(originalCreatedBy); // Should remain unchanged
+        assertThat(loadedPersonNode.getLastModifiedBy()).isEqualTo("system"); // Should be updated
+        assertThat(loadedPersonNode.getLastModifiedDate()).isNotNull(); // Should be updated
     }
 }
