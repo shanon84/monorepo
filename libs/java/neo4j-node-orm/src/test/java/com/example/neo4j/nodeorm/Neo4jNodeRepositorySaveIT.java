@@ -279,4 +279,88 @@ class Neo4jNodeRepositorySaveIT {
         assertThat(loadedPersonNode.getLastModifiedBy()).isEqualTo("system"); // Should be updated
         assertThat(loadedPersonNode.getLastModifiedDate()).isNotNull(); // Should be updated
     }
+
+    @Test
+    void shouldNotUpdateRelatedNodeWhenCascadeUpdatesIsFalse() {
+        // Given - Create a project manager first
+        PersonNode manager = new PersonNode()
+                .setFirstName("Sarah")
+                .setLastName("Connor")
+                .setAge(45);
+
+        List<PersonNode> savedManagers = StreamSupport.stream(personNodeRepository.saveAll(List.of(manager)).spliterator(), false).toList();
+        PersonNode savedManager = savedManagers.get(0);
+        String managerId = savedManager.getId();
+
+        // Verify manager exists
+        assertThat(managerId).isNotNull();
+        assertThat(savedManager.getLastName()).isEqualTo("Connor");
+
+        // When - Create a project with the existing manager but with modified properties
+        PersonNode modifiedManager = new PersonNode()
+                .setId(managerId)
+                .setFirstName("Sarah")
+                .setLastName("Modified") // Changed last name
+                .setAge(50); // Changed age
+
+        ProjectNode project = new ProjectNode()
+                .setProjectName("Neo4j ORM")
+                .setStartDate(LocalDate.of(2024, 1, 1))
+                .setEndDate(LocalDate.of(2024, 12, 31))
+                .setProjectManager(modifiedManager); // cascadeUpdates = false
+
+        List<ProjectNode> savedProjects = StreamSupport.stream(projectNodeRepository.saveAll(List.of(project)).spliterator(), false).toList();
+
+        // Then - Verify project was saved
+        assertThat(savedProjects).hasSize(1);
+        assertThat(savedProjects.get(0).getId()).isNotNull();
+        assertThat(savedProjects.get(0).getProjectManager()).isNotNull();
+
+        // Verify manager was NOT updated (cascadeUpdates = false)
+        PersonNode managerInDb = personNodeRepository.findById(managerId).orElseThrow();
+        assertThat(managerInDb.getLastName()).isEqualTo("Connor"); // Should remain unchanged
+        assertThat(managerInDb.getAge()).isEqualTo(45); // Should remain unchanged
+    }
+
+    @Test
+    void shouldUpdateRelatedNodeWhenCascadeUpdatesIsTrue() {
+        // Given - Create a developer first
+        PersonNode developer = new PersonNode()
+                .setFirstName("Tom")
+                .setLastName("Anderson")
+                .setAge(30);
+
+        List<PersonNode> savedDevelopers = StreamSupport.stream(personNodeRepository.saveAll(List.of(developer)).spliterator(), false).toList();
+        PersonNode savedDeveloper = savedDevelopers.get(0);
+        String developerId = savedDeveloper.getId();
+
+        // Verify developer exists
+        assertThat(developerId).isNotNull();
+        assertThat(savedDeveloper.getLastName()).isEqualTo("Anderson");
+
+        // When - Create a project with the existing developer but with modified properties
+        PersonNode modifiedDeveloper = new PersonNode()
+                .setId(developerId)
+                .setFirstName("Tom")
+                .setLastName("Modified") // Changed last name
+                .setAge(35); // Changed age
+
+        ProjectNode project = new ProjectNode()
+                .setProjectName("Neo4j ORM")
+                .setStartDate(LocalDate.of(2024, 1, 1))
+                .setEndDate(LocalDate.of(2024, 12, 31))
+                .setTeamMembers(List.of(modifiedDeveloper)); // cascadeUpdates = true (default)
+
+        List<ProjectNode> savedProjects = StreamSupport.stream(projectNodeRepository.saveAll(List.of(project)).spliterator(), false).toList();
+
+        // Then - Verify project was saved
+        assertThat(savedProjects).hasSize(1);
+        assertThat(savedProjects.get(0).getId()).isNotNull();
+        assertThat(savedProjects.get(0).getTeamMembers()).hasSize(1);
+
+        // Verify developer WAS updated (cascadeUpdates = true by default)
+        PersonNode developerInDb = personNodeRepository.findById(developerId).orElseThrow();
+        assertThat(developerInDb.getLastName()).isEqualTo("Modified"); // Should be updated
+        assertThat(developerInDb.getAge()).isEqualTo(35); // Should be updated
+    }
 }

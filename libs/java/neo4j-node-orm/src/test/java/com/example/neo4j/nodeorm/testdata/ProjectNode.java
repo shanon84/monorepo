@@ -27,6 +27,6 @@ public class ProjectNode {
     @Relationship(type = "WORKS_ON", direction = Relationship.Direction.INCOMING)
     private List<PersonNode> teamMembers = new ArrayList<>();
 
-    @Relationship(type = "MANAGED_BY", direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "MANAGED_BY", direction = Relationship.Direction.OUTGOING, cascadeUpdates = false)
     private PersonNode projectManager;
 }

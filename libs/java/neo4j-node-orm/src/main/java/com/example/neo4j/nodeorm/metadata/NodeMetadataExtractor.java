@@ -130,6 +130,7 @@ public class NodeMetadataExtractor {
         Relationship relationshipAnnotation = field.getAnnotation(Relationship.class);
         metadata.setRelationshipType(relationshipAnnotation.type());
         metadata.setDirection(relationshipAnnotation.direction());
+        metadata.setCascadeUpdates(relationshipAnnotation.cascadeUpdates());
 
         Class<?> fieldType = field.getType();
         boolean isCollection = Collection.class.isAssignableFrom(fieldType);

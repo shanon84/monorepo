@@ -443,17 +443,26 @@ Wenn der User eine grundsätzliche Anweisung gibt (z.B. "programmiere grundsätz
 
 **Bei JEDER Code-Änderung** MUSS folgender Workflow eingehalten werden:
 
-1. **Build ausführen**: `yarn build-BE` oder `nx build-BE <projekt-name>`
-2. **Unit Tests ausführen**: `yarn unittest-BE` oder `nx unittest-BE <projekt-name>`
-3. **Integration Tests ausführen**: `yarn integrationtest-BE` oder `nx integrationtest-BE <projekt-name>`
-4. **Bei Fehlschlägen**:
+1. **Anforderung implementieren**: Code-Änderung durchführen
+2. **Tests AUTOMATISCH schreiben**:
+    - **NIEMALS darauf warten**, dass der User Tests anfordert
+    - **IMMER selbstständig** Tests für neue Funktionalität schreiben
+    - Integration Tests bevorzugen (Suffix `IT.java`)
+    - Tests müssen das neue Verhalten vollständig abdecken
+3. **Build ausführen**: `yarn build-BE` oder `nx build-BE <projekt-name>`
+4. **Unit Tests ausführen**: `yarn unittest-BE` oder `nx unittest-BE <projekt-name>`
+5. **Integration Tests ausführen**: `yarn integrationtest-BE` oder `nx integrationtest-BE <projekt-name>`
+6. **Bei Fehlschlägen**:
     - **Test anpassen**: Wenn die fachliche Änderung korrekt ist und der Test veraltet
     - **Code fixen**: Wenn die Implementierung fehlerhaft ist
-    - **Wiederhole Schritte 1-3** bis alle Tests grün sind
+    - **Wiederhole Schritte 3-5** bis alle Tests grün sind
+7. **Dokumentation aktualisieren**: CLAUDE.md bei neuen Konventionen/Patterns aktualisieren
 
 **WICHTIG**:
 
+- **Tests sind PFLICHT**: Jede neue Anforderung benötigt automatisch Tests - OHNE zu fragen!
 - Änderungen NIEMALS ohne erfolgreiche Tests committen
 - Affected-Targets verwenden für schnellere Feedbackzyklen: `yarn build-BE:affected`
 - Bei Neo4j-Projekten: Podman Compose starten (`podman compose -f compose/docker-compose.yaml up -d`)
 - Formatierung vor Tests: `yarn format-BE`
+- **CLAUDE.md aktualisieren**: Bei neuen Konventionen immer die entsprechende CLAUDE.md anpassen

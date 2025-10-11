@@ -14,4 +14,5 @@ public class RelationshipMetadata {
     private Relationship.Direction direction;
     private Class<?> targetType;
     private boolean collection;
+    private boolean cascadeUpdates = true; // Default: true (backwards compatible)
 }

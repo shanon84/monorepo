@@ -115,20 +115,41 @@ public class Neo4jSaveService {
             }
 
             if (relationship.isCollection()) {
-                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, allNodesToSave);
+                collectRelatedEntitiesFromCollection((Collection<?>) relatedValue, relationship, allNodesToSave);
             } else {
-                collectNodesToSave(relatedValue, allNodesToSave);
+                collectRelatedNode(relatedValue, relationship, allNodesToSave);
             }
         }
     }
 
     private void collectRelatedEntitiesFromCollection(
             Collection<?> relatedEntities,
+            RelationshipMetadata relationship,
             Set<Object> allNodesToSave
     ) {
         for (Object relatedEntity : relatedEntities) {
-            collectNodesToSave(relatedEntity, allNodesToSave);
+            collectRelatedNode(relatedEntity, relationship, allNodesToSave);
         }
+    }
+
+    private void collectRelatedNode(
+            Object relatedNode,
+            RelationshipMetadata relationship,
+            Set<Object> allNodesToSave
+    ) {
+        // If cascadeUpdates is false, only collect nodes that don't have an ID yet (new nodes)
+        if (!relationship.isCascadeUpdates()) {
+            NodeMetadata relatedMetadata = metadataExtractor.extractMetadata(relatedNode.getClass());
+            Object relatedId = reflectionService.getFieldValue(relatedMetadata.getIdField().getField(), relatedNode);
+
+            // Skip nodes with existing IDs when cascadeUpdates = false
+            if (relatedId != null) {
+                return;
+            }
+        }
+
+        // Collect the node for saving
+        collectNodesToSave(relatedNode, allNodesToSave);
     }
 
     private void saveNodesInBulk(Set<Object> allNodesToSave) {
