@@ -33,6 +33,38 @@ public class Neo4jSavePersistence {
         return (Boolean) result.get("exists");
     }
 
+    /**
+     * Bulk check if nodes exist by their IDs.
+     * Returns a Map with ID as key and boolean existence as value.
+     */
+    public Map<Object, Boolean> nodesExistByIds(List<Object> ids, NodeMetadata metadata) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        String nodeName = metadata.getNodeName();
+        String idPropertyName = metadata.getIdField().getFieldName();
+
+        // Use UNWIND to check all IDs in one query
+        String cypher = "UNWIND $ids AS id " +
+                "OPTIONAL MATCH (n:" + nodeName + ") WHERE n." + idPropertyName + " = id " +
+                "RETURN id, n IS NOT NULL AS exists";
+
+        List<Map<String, Object>> results = new ArrayList<>(neo4jClient.query(cypher)
+                .bind(ids).to("ids")
+                .fetch()
+                .all());
+
+        Map<Object, Boolean> existsMap = new HashMap<>();
+        for (Map<String, Object> result : results) {
+            Object id = result.get("id");
+            Boolean exists = (Boolean) result.get("exists");
+            existsMap.put(id, exists);
+        }
+
+        return existsMap;
+    }
+
     public void updateNodesBulk(
             List<Object> nodes,
             NodeMetadata metadata

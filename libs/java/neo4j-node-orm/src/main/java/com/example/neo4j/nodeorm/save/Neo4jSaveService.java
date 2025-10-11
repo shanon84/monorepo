@@ -163,6 +163,18 @@ public class Neo4jSaveService {
             List<Object> nodes = entry.getValue();
             NodeMetadata metadata = metadataExtractor.extractMetadata(nodeClass);
 
+            // Collect all IDs that need to be checked
+            List<Object> idsToCheck = new java.util.ArrayList<>();
+            for (Object node : nodes) {
+                Object nodeId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
+                if (nodeId != null) {
+                    idsToCheck.add(nodeId);
+                }
+            }
+
+            // Bulk check which nodes exist in DB (ONE query instead of N queries)
+            Map<Object, Boolean> existsMap = savePersistence.nodesExistByIds(idsToCheck, metadata);
+
             // Separate nodes into CREATE and UPDATE lists
             List<Object> nodesToCreate = new java.util.ArrayList<>();
             List<Object> nodesToUpdate = new java.util.ArrayList<>();
@@ -172,8 +184,8 @@ public class Neo4jSaveService {
                 Object nodeId = reflectionService.getFieldValue(metadata.getIdField().getField(), node);
 
                 if (nodeId != null) {
-                    // Real ID exists - check if node exists in DB
-                    boolean exists = savePersistence.nodeExistsById(nodeId, metadata);
+                    // Real ID exists - check if node exists in DB (from bulk check)
+                    boolean exists = existsMap.getOrDefault(nodeId, false);
                     if (exists) {
                         nodesToUpdate.add(node);
                     } else {

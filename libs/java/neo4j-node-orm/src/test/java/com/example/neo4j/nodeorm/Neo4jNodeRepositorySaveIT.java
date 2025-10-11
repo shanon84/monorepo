@@ -363,4 +363,59 @@ class Neo4jNodeRepositorySaveIT {
         assertThat(developerInDb.getLastName()).isEqualTo("Modified"); // Should be updated
         assertThat(developerInDb.getAge()).isEqualTo(35); // Should be updated
     }
+
+    @Test
+    void shouldUseBulkExistsCheckWhenSavingManyNodes() {
+        // Given - Create 50 existing persons
+        List<PersonNode> existingPersons = new java.util.ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            PersonNode person = new PersonNode()
+                    .setFirstName("Person" + i)
+                    .setLastName("Existing")
+                    .setAge(20 + i);
+            existingPersons.add(person);
+        }
+
+        List<PersonNode> savedExistingPersons = StreamSupport.stream(
+                personNodeRepository.saveAll(existingPersons).spliterator(), false
+        ).toList();
+
+        // Verify all persons were saved
+        assertThat(savedExistingPersons).hasSize(50);
+        assertThat(savedExistingPersons).allMatch(p -> p.getId() != null);
+
+        // When - Update all 50 persons (this should use bulk exists check)
+        List<PersonNode> personsToUpdate = new java.util.ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            PersonNode person = new PersonNode()
+                    .setId(savedExistingPersons.get(i).getId())
+                    .setFirstName("Person" + i)
+                    .setLastName("Updated") // Changed
+                    .setAge(30 + i); // Changed
+            personsToUpdate.add(person);
+        }
+
+        List<PersonNode> updatedPersons = StreamSupport.stream(
+                personNodeRepository.saveAll(personsToUpdate).spliterator(), false
+        ).toList();
+
+        // Then - Verify all persons were updated (not duplicated)
+        assertThat(updatedPersons).hasSize(50);
+
+        // Verify in database - should still be 50 persons, not 100
+        long personCount = neo4jClient.query("MATCH (p:Person) RETURN count(p) as count")
+                .fetch()
+                .one()
+                .map(result -> ((Number) result.get("count")).longValue())
+                .orElse(0L);
+
+        assertThat(personCount).isEqualTo(50); // Should NOT have duplicates
+
+        // Verify all persons have updated values
+        for (int i = 0; i < 50; i++) {
+            PersonNode personInDb = personNodeRepository.findById(updatedPersons.get(i).getId()).orElseThrow();
+            assertThat(personInDb.getLastName()).isEqualTo("Updated");
+            assertThat(personInDb.getAge()).isEqualTo(30 + i);
+        }
+    }
 }
