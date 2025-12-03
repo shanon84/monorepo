@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
 
@@ -23,14 +23,14 @@
     <properties>
         <revision>0.0.1-SNAPSHOT</revision>
         <java.version>21</java.version>
-        <springboot.version>3.5.7</springboot.version>
+        <springboot.version>3.5.8</springboot.version>
         <jackson-databind-nullable.version>0.2.8</jackson-databind-nullable.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
         <!-- OPENAPI -->
-        <swagger-ui.version>5.30.2</swagger-ui.version>
-        <swagger.version>2.2.40</swagger.version>
+        <swagger-ui.version>5.30.3</swagger-ui.version>
+        <swagger.version>2.2.41</swagger.version>
 
         <!-- TESTING -->
         <archunit.version>1.4.1</archunit.version>
@@ -39,7 +39,7 @@
         <!-- PLUGINS -->
         <openapi-generator-maven-plugin.version>7.17.0</openapi-generator-maven-plugin.version>
         <arch-unit-maven-plugin.version>4.0.2</arch-unit-maven-plugin.version>
-        <versions-maven-plugin.version>2.19.1</versions-maven-plugin.version>
+        <versions-maven-plugin.version>2.20.1</versions-maven-plugin.version>
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <exec-maven-plugin.version>3.6.2</exec-maven-plugin.version>
