@@ -118,7 +118,7 @@
       ],
       "executor": "@jnxplus/nx-maven:run-task",
       "options": {
-        "task": "jacoco:prepare-agent failsafe:integration-test jacoco:report -DskipTests"
+        "task": "jacoco:prepare-agent failsafe:integration-test failsafe:verify jacoco:report -DskipTests"
       },
       "dependsOn": [
         "build-BE"
@@ -152,24 +152,6 @@
       }
     },
     {
-      "plugin": "@nx/playwright/plugin",
-      "options": {
-        "targetName": "e2e"
-      }
-    },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      }
-    },
-    {
       "plugin": "@jnxplus/nx-maven",
       "options": {
         "localRepoRelativePath": ".m2/repository",
@@ -183,8 +165,7 @@
   "generators": {
     "@nx/next": {
       "application": {
-        "style": "css",
-        "linter": "eslint"
+        "style": "css"
       }
     }
   },
@@ -195,8 +176,6 @@
         "cacheableOperations": [
           "build",
           "test",
-          "lint",
-          "e2e",
           "build-BE",
           "unittest-BE",
           "integrationtest-BE"
